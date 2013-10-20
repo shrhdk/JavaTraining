@@ -9,10 +9,6 @@ public class Fibonacci {
 		
 		String mark = "";
 		for(int i = 0; i < fibonacci.length; i++){
-			if (fibonacci[i] % 2 == 0)
-				mark = " *";
-			else
-				mark = "";
 			System.out.println(i + ": " + fibonacci[i] + mark);
 		}
 	}
