@@ -36,6 +36,6 @@ public class TestFibonacci {
 
     @Test(expected = IllegalArgumentException.class)
     public void testBuildForMaxIndexIsNegativeValue() throws Exception {
-	int [] fibonacci = Fibonacci.build(-1);
+	int[] fibonacci = Fibonacci.build(-1);
     }
 }
