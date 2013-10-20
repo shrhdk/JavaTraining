@@ -5,7 +5,13 @@ public class ImprovedFibonacci {
     static final int MAX_INDEX = 9;
 
     public static void main(String[] args) {
-
+	ImprovedFibonacci.FibonacciNumber[] fibonacci = ImprovedFibonacci.build(MAX_INDEX);
+	
+	for(int i = 0; i < fibonacci.length; i++){
+	    String mark = fibonacci[i].isEven() ? " *":"";
+	    String line = String.format("%d: %d%s", i + 1, fibonacci[i].getNumber(), mark);
+	    System.out.println(line);
+	}
     }
 
     public static FibonacciNumber[] build(final int maxIndex) throws IllegalArgumentException {
@@ -31,7 +37,7 @@ public class ImprovedFibonacci {
 	return fibonacci;
     }
 
-    public static class FibonacciNumber{
+    public static class FibonacciNumber {
 	int number;
 
 	public FibonacciNumber(final int number) {
