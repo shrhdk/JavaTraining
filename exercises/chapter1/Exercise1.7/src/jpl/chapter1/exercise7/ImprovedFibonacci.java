@@ -1,3 +1,5 @@
+package jpl.chapter1.exercise7;
+
 public class ImprovedFibonacci {
 
 	static final int MAX_INDEX = 9;

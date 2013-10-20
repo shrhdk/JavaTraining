@@ -1,3 +1,5 @@
+package jpl.chapter1.exercise3;
+
 public class Fibonacci {
 
 	public static void main(String[] args) {

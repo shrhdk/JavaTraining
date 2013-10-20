@@ -1,3 +1,5 @@
+package jpl.chapter1.exercise4;
+
 public class Squares {
 
 	public static void main(String[] args) {

@@ -1,3 +1,5 @@
+package jpl.chapter1.exercise2;
+
 public class HelloWorldError {
 
 	public static void main(String[] args) {

@@ -1,3 +1,5 @@
+package jpl.chapter1.exercise6;
+
 public class Fibonacci {
 
 	public static int MAX = 50;
