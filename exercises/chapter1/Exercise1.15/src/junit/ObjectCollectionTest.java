@@ -168,7 +168,7 @@ public class ObjectCollectionTest {
     public void testAddForValueIsNull() {
 	ObjectCollection collection = new ObjectCollection(3);
 	collection.add("hoge", null);
-	
+
 	assertEquals(null, collection.find("hoge"));
     }
 
