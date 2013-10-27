@@ -46,11 +46,13 @@ public class ImprovedFibonacciTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testBuildForMaxIndexIs0() throws Exception {
+	@SuppressWarnings("unused")
 	ImprovedFibonacci.FibonacciNumber[] fibonacci = ImprovedFibonacci.build(0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testBuildForMaxIndexIsNegativeValue() throws Exception {
+	@SuppressWarnings("unused")
 	ImprovedFibonacci.FibonacciNumber[] fibonacci = ImprovedFibonacci.build(-1);
     }
 }

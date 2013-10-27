@@ -1,8 +1,8 @@
 package junit;
 
 import org.junit.*;
-import static org.junit.Assert.*;
 
+import static org.junit.Assert.*;
 import jpl.chapter1.exercise9.*;
 
 public class TestFibonacci {
@@ -31,11 +31,13 @@ public class TestFibonacci {
 
     @Test(expected = IllegalArgumentException.class)
     public void testBuildForMaxIndexIs0() throws Exception {
+	@SuppressWarnings("unused")
 	int[] fibonacci = Fibonacci.build(0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testBuildForMaxIndexIsNegativeValue() throws Exception {
+	@SuppressWarnings("unused")
 	int[] fibonacci = Fibonacci.build(-1);
     }
 }
