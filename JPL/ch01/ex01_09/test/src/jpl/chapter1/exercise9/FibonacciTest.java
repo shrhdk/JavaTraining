@@ -5,7 +5,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import jpl.chapter1.exercise9.*;
 
-public class TestFibonacci {
+public class FibonacciTest {
 
     @Test
     public void testBuild() {
