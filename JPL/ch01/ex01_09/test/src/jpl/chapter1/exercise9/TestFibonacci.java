@@ -1,4 +1,4 @@
-package junit;
+package jpl.chapter1.exercise9;
 
 import org.junit.*;
 

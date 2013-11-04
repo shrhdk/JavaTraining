@@ -1,4 +1,4 @@
-package junit;
+package jpl.chapter1.exercise16;
 
 import java.io.IOException;
 

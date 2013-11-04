@@ -1,4 +1,4 @@
-package junit;
+package jpl.chapter1.exercise10;
 
 import static org.junit.Assert.*;
 import jpl.chapter1.exercise10.*;
