@@ -5,10 +5,10 @@ import static org.junit.Assert.*;
 
 public class MyUtilitiesTest {
 
-    @Test
-    @Ignore
-    public void test() {
-	fail("Not yet implemented");
-    }
+	@Test
+	@Ignore
+	public void test() {
+		fail("Not yet implemented");
+	}
 
 }

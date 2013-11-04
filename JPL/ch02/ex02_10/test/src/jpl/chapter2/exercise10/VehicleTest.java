@@ -5,58 +5,58 @@ import static org.junit.Assert.*;
 
 public class VehicleTest {
 
-    @Before
-    public void setup() {
-	Vehicle.resetId();
-    }
+	@Before
+	public void setup() {
+		Vehicle.resetId();
+	}
 
-    @Test
-    public void testVehicle() {
-	Vehicle vehicle1 = new Vehicle();
-	Vehicle vehicle2 = new Vehicle();
-	Vehicle vehicle3 = new Vehicle();
+	@Test
+	public void testVehicle() {
+		Vehicle vehicle1 = new Vehicle();
+		Vehicle vehicle2 = new Vehicle();
+		Vehicle vehicle3 = new Vehicle();
 
-	assertEquals(0, vehicle1.getId());
-	assertEquals(1, vehicle2.getId());
-	assertEquals(2, vehicle3.getId());
-    }
+		assertEquals(0, vehicle1.getId());
+		assertEquals(1, vehicle2.getId());
+		assertEquals(2, vehicle3.getId());
+	}
 
-    @Test
-    public void testVehicleWithOwner() {
-	Vehicle vehicle1 = new Vehicle("hoge");
-	Vehicle vehicle2 = new Vehicle("fuga");
-	Vehicle vehicle3 = new Vehicle("piyo");
+	@Test
+	public void testVehicleWithOwner() {
+		Vehicle vehicle1 = new Vehicle("hoge");
+		Vehicle vehicle2 = new Vehicle("fuga");
+		Vehicle vehicle3 = new Vehicle("piyo");
 
-	assertEquals(0, vehicle1.getId());
-	assertEquals("hoge", vehicle1.owner);
-	assertEquals(1, vehicle2.getId());
-	assertEquals("fuga", vehicle2.owner);
-	assertEquals(2, vehicle3.getId());
-	assertEquals("piyo", vehicle3.owner);
-    }
+		assertEquals(0, vehicle1.getId());
+		assertEquals("hoge", vehicle1.owner);
+		assertEquals(1, vehicle2.getId());
+		assertEquals("fuga", vehicle2.owner);
+		assertEquals(2, vehicle3.getId());
+		assertEquals("piyo", vehicle3.owner);
+	}
 
-    @SuppressWarnings("unused")
-    @Test
-    public void testGetMaximumId() {
-	Vehicle vehicle1 = new Vehicle("hoge");
-	Vehicle vehicle2 = new Vehicle("fuga");
-	Vehicle vehicle3 = new Vehicle("piyo");
+	@SuppressWarnings("unused")
+	@Test
+	public void testGetMaximumId() {
+		Vehicle vehicle1 = new Vehicle("hoge");
+		Vehicle vehicle2 = new Vehicle("fuga");
+		Vehicle vehicle3 = new Vehicle("piyo");
 
-	assertEquals(2, Vehicle.getMaximumId());
-    }
+		assertEquals(2, Vehicle.getMaximumId());
+	}
 
-    @Test(expected = IllegalStateException.class)
-    public void testGetMaximumIdForFirstTime() {
-	Vehicle.getMaximumId();
-    }
+	@Test(expected = IllegalStateException.class)
+	public void testGetMaximumIdForFirstTime() {
+		Vehicle.getMaximumId();
+	}
 
-    @Test
-    public void testToString() {
-	Vehicle vehicle1 = new Vehicle("hoge");
-	Vehicle vehicle2 = new Vehicle("fuga");
-	
-	assertEquals("0 (hoge)", vehicle1.toString());
-	assertEquals("1 (fuga)", vehicle2.toString());
-    }
+	@Test
+	public void testToString() {
+		Vehicle vehicle1 = new Vehicle("hoge");
+		Vehicle vehicle2 = new Vehicle("fuga");
+
+		assertEquals("0 (hoge)", vehicle1.toString());
+		assertEquals("1 (fuga)", vehicle2.toString());
+	}
 
 }

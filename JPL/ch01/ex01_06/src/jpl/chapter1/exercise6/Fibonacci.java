@@ -4,7 +4,7 @@ public class Fibonacci {
 
 	public static int MAX = 50;
 	static final String TITLE = "値が" + MAX + "未満のフィボナッチ数列";
-	
+
 	public static void main(String[] args) {
 		int lo = 1;
 		int hi = 1;
