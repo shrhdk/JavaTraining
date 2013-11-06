@@ -1,10 +1,9 @@
 package jpl.chapter1.exercise16;
 
-import java.io.IOException;
-
 import org.junit.*;
 import static org.junit.Assert.*;
-import jpl.chapter1.exercise16.*;
+
+import java.io.IOException;
 
 public class BadDataSetExceptionTest {
 

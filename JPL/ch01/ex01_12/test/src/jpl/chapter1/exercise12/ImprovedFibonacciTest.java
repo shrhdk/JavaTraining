@@ -1,9 +1,7 @@
 package jpl.chapter1.exercise12;
 
 import org.junit.*;
-
 import static org.junit.Assert.*;
-import jpl.chapter1.exercise12.*;
 
 public class ImprovedFibonacciTest {
 

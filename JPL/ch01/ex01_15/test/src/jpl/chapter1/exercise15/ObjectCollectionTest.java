@@ -3,8 +3,6 @@ package jpl.chapter1.exercise15;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import jpl.chapter1.exercise15.*;
-
 public class ObjectCollectionTest {
 
 	ObjectCollection collection;
