@@ -8,7 +8,7 @@ public class TwoPlugsWalkman extends Walkman {
 		this.subPlug = subPlug;
 	}
 
-	public void connectSubPlug() {
+	public void disconnectSubPlug() {
 		this.subPlug = null;
 	}
 

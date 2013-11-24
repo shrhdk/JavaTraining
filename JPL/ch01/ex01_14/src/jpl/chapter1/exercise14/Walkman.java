@@ -10,7 +10,7 @@ public class Walkman {
 		this.plug = plug;
 	}
 
-	public void disconnectPlug(final Plug plug) {
+	public void disconnectPlug() {
 		this.plug = null;
 	}
 
