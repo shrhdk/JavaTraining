@@ -113,6 +113,11 @@ public class Tokei extends Frame implements Runnable {
 		g.drawImage(imageBuffer, 0, 0, this);
 	}
 
+	@Override
+	public void update(Graphics g) {
+		paint(g);
+	}
+
 	public static void main(String args[]) {
 		Tokei tokei = new Tokei();
 		Thread thread = new Thread(tokei);
