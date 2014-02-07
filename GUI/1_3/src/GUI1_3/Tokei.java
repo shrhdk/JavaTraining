@@ -3,8 +3,6 @@ package GUI1_3;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Tokei extends Window implements Runnable {
 
@@ -28,7 +26,6 @@ public class Tokei extends Window implements Runnable {
 	public Color fontColor = Color.BLACK;
 	public Color backGroundColor = Color.WHITE;
 
-	@SuppressWarnings("deprecation")
 	public Tokei() {
 		super(null, null);
 
