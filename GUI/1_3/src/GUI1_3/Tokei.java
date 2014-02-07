@@ -29,12 +29,12 @@ public class Tokei extends Window implements Runnable {
 	public Tokei() {
 		super(null, null);
 
-		// ƒ|ƒbƒvƒAƒbƒvƒƒjƒ…[(ƒtƒHƒ“ƒgAƒtƒHƒ“ƒgƒTƒCƒYA•¶šFA”wŒiFAI—¹)
+		// ãƒãƒƒãƒ—ã‚¢ãƒƒãƒ—ãƒ¡ãƒ‹ãƒ¥ãƒ¼(ãƒ•ã‚©ãƒ³ãƒˆã€ãƒ•ã‚©ãƒ³ãƒˆã‚µã‚¤ã‚ºã€æ–‡å­—è‰²ã€èƒŒæ™¯è‰²ã€çµ‚äº†)
 		popup = new PopupMenu();
 		add(popup);
 		Menu menu;
 
-		// ƒtƒHƒ“ƒgƒƒjƒ…[
+		// ãƒ•ã‚©ãƒ³ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼
 		Menu menuFont = new Menu("Font");
 		popup.add(menuFont);
 		ActionListener menuFontListener = new ActionListener() {
@@ -54,7 +54,7 @@ public class Tokei extends Window implements Runnable {
 			menuFont.add(menu);
 		}
 
-		// ƒtƒHƒ“ƒgƒTƒCƒYƒƒjƒ…[
+		// ãƒ•ã‚©ãƒ³ãƒˆã‚µã‚¤ã‚ºãƒ¡ãƒ‹ãƒ¥ãƒ¼
 		Menu menuSize = new Menu("Size");
 		popup.add(menuSize);
 		ActionListener menuSizeListener = new ActionListener() {
@@ -70,7 +70,7 @@ public class Tokei extends Window implements Runnable {
 			menuSize.add(menu);
 		}
 
-		// •¶šFƒƒjƒ…[
+		// æ–‡å­—è‰²ãƒ¡ãƒ‹ãƒ¥ãƒ¼
 		Menu menuColor = new Menu("Font Color");
 		popup.add(menuColor);
 		ActionListener menuColorListener = new ActionListener() {
@@ -86,7 +86,7 @@ public class Tokei extends Window implements Runnable {
 			menuColor.add(menu);
 		}
 
-		// ”wŒiƒƒjƒ…[
+		// èƒŒæ™¯ãƒ¡ãƒ‹ãƒ¥ãƒ¼
 		Menu menuBgColor = new Menu("Background Color");
 		popup.add(menuBgColor);
 		ActionListener menuBgColorListener = new ActionListener() {
@@ -102,7 +102,7 @@ public class Tokei extends Window implements Runnable {
 			menuBgColor.add(menu);
 		}
 
-		// I—¹ƒƒjƒ…[
+		// çµ‚äº†ãƒ¡ãƒ‹ãƒ¥ãƒ¼
 		Menu menuExit = new Menu("Exit");
 		popup.add(menuExit);
 		ActionListener menuExitListener = new ActionListener() {
@@ -113,7 +113,7 @@ public class Tokei extends Window implements Runnable {
 		};
 		menuExit.addActionListener(menuExitListener);
 
-		// ƒ}ƒEƒX
+		// ãƒã‚¦ã‚¹
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -160,14 +160,14 @@ public class Tokei extends Window implements Runnable {
 	}
 
 	public void paint(Graphics g) {
-		// ŠÔ•¶š—ñ‚ğZo
+		// æ™‚é–“æ–‡å­—åˆ—ã‚’ç®—å‡º
 		Calendar now = Calendar.getInstance();
 		int h = now.get(Calendar.HOUR_OF_DAY);
 		int m = now.get(Calendar.MINUTE);
 		int s = now.get(Calendar.SECOND);
 		String time = String.format("%02d:%02d:%02d", h, m, s);
 
-		// •¶š—ñ‚Ì‘å‚«‚³‚ğ‘ª‚é
+		// æ–‡å­—åˆ—ã®å¤§ãã•ã‚’æ¸¬ã‚‹
 		if (fontFamily != null)
 			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
 		else
@@ -178,28 +178,28 @@ public class Tokei extends Window implements Runnable {
 		int stringWidth = ft.stringWidth(time);
 		int standardWidth = ft.stringWidth("00:00:00");
 
-		// ƒtƒŒ[ƒ€‚Ì‘å‚«‚³‚ğÄİ’è
+		// ãƒ•ãƒ¬ãƒ¼ãƒ ã®å¤§ãã•ã‚’å†è¨­å®š
 		int height = stringHeight + MARGIN * 2;
 		int width = standardWidth + MARGIN * 2;
 		setSize(width, height);
 
-		// ƒoƒbƒtƒ@[ƒCƒ[ƒW‚ğì¬
+		// ãƒãƒƒãƒ•ã‚¡ãƒ¼ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’ä½œæˆ
 		if (imageBuffer == null || imageBuffer.getWidth(this) != width
 				|| imageBuffer.getHeight(this) != height) {
 			imageBuffer = createImage(width, height);
 			graphicsBuffer = null;
 		}
 
-		// ƒoƒbƒtƒ@[ƒOƒ‰ƒtƒBƒbƒNƒX‚ğì¬
+		// ãƒãƒƒãƒ•ã‚¡ãƒ¼ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ã‚¹ã‚’ä½œæˆ
 		if (graphicsBuffer == null) {
 			graphicsBuffer = imageBuffer.getGraphics();
 		}
 
-		// ”wŒi‚ğ“h‚è‚Â‚Ô‚·
+		// èƒŒæ™¯ã‚’å¡—ã‚Šã¤ã¶ã™
 		graphicsBuffer.setColor(backGroundColor);
 		graphicsBuffer.fillRect(0, 0, width, height);
 
-		// ŠÔ•¶š—ñ‚ğ•`‰æ
+		// æ™‚é–“æ–‡å­—åˆ—ã‚’æç”»
 		if (fontFamily != null)
 			graphicsBuffer.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
 		else
@@ -208,7 +208,7 @@ public class Tokei extends Window implements Runnable {
 		graphicsBuffer.drawString(time, MARGIN + (standardWidth - stringWidth)
 				/ 2, MARGIN + stringHeight);
 
-		// ƒoƒbƒtƒ@‚ğ‰æ–Ê‚ÉƒRƒs[‚·‚é
+		// ãƒãƒƒãƒ•ã‚¡ã‚’ç”»é¢ã«ã‚³ãƒ”ãƒ¼ã™ã‚‹
 		g.drawImage(imageBuffer, 0, 0, this);
 	}
 
