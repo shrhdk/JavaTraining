@@ -32,7 +32,7 @@ public class Tokei extends Window implements Runnable {
 		// ポップアップメニュー(フォント、フォントサイズ、文字色、背景色、終了)
 		popup = new PopupMenu();
 		add(popup);
-		Menu menu;
+		MenuItem menu;
 
 		// フォントメニュー
 		Menu menuFont = new Menu("Font");
@@ -49,7 +49,7 @@ public class Tokei extends Window implements Runnable {
 		String[] fontFamilies = ge.getAvailableFontFamilyNames();
 		// Set label
 		for (String label : fontFamilies) {
-			menu = new Menu(label);
+			menu = new MenuItem(label);
 			menu.addActionListener(menuFontListener);
 			menuFont.add(menu);
 		}
@@ -65,7 +65,7 @@ public class Tokei extends Window implements Runnable {
 			}
 		};
 		for (String label : new String[] { "100", "200", "300" }) {
-			menu = new Menu(label);
+			menu = new MenuItem(label);
 			menu.addActionListener(menuSizeListener);
 			menuSize.add(menu);
 		}
@@ -81,7 +81,7 @@ public class Tokei extends Window implements Runnable {
 		};
 		for (String label : new String[] { "Black", "White", "Red", "Green",
 				"Blue" }) {
-			menu = new Menu(label);
+			menu = new MenuItem(label);
 			menu.addActionListener(menuColorListener);
 			menuColor.add(menu);
 		}
@@ -97,13 +97,13 @@ public class Tokei extends Window implements Runnable {
 		};
 		for (String label : new String[] { "Black", "White", "Red", "Green",
 				"Blue" }) {
-			menu = new Menu(label);
+			menu = new MenuItem(label);
 			menu.addActionListener(menuBgColorListener);
 			menuBgColor.add(menu);
 		}
 
 		// 終了メニュー
-		Menu menuExit = new Menu("Exit");
+		MenuItem menuExit = new MenuItem("Exit");
 		popup.add(menuExit);
 		ActionListener menuExitListener = new ActionListener() {
 			@Override
