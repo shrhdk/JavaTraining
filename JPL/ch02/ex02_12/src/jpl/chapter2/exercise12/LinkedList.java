@@ -7,11 +7,11 @@ public class LinkedList {
 	public LinkedList next = null;
 
 	public static void main(String args[]) {
-		System.out.println("VehicleƒNƒ‰ƒX‚Å‰Â•Ï’·ƒƒ\ƒbƒh‚ğŠˆ—p‚·‚éê–Ê‚Ív‚¢‚Â‚«‚Ü‚¹‚ñB");
+		System.out.println("Vehicleã‚¯ãƒ©ã‚¹ã§å¯å¤‰é•·ãƒ¡ã‚½ãƒƒãƒ‰ã‚’æ´»ç”¨ã™ã‚‹å ´é¢ã¯æ€ã„ã¤ãã¾ã›ã‚“ã€‚");
 		System.out
-				.println("LinkedListƒNƒ‰ƒX‚Å‚ÍA‰Â•Ï’·ƒƒ\ƒbƒh‚Å‚Í‚ ‚è‚Ü‚¹‚ñ‚ªAƒIƒuƒWƒFƒNƒg‚Ì”z—ñ‚©‚çƒIƒuƒWƒFƒNƒg‚ÌƒŠƒXƒg‚ªì‚ê‚é‰Â•Ï’·ƒRƒ“ƒXƒgƒ‰ƒNƒ^‚ª‚ ‚ê‚Î•Ö—˜‚Å‚·B");
+				.println("LinkedListã‚¯ãƒ©ã‚¹ã§ã¯ã€å¯å¤‰é•·ãƒ¡ã‚½ãƒƒãƒ‰ã§ã¯ã‚ã‚Šã¾ã›ã‚“ãŒã€ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®é…åˆ—ã‹ã‚‰ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒªã‚¹ãƒˆãŒä½œã‚Œã‚‹å¯å¤‰é•·ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ãŒã‚ã‚Œã°ä¾¿åˆ©ã§ã™ã€‚");
 		System.out
-				.println("(Às—á) new LinkedList(\"A\", \"B\", \"C\", \"D\").toString(): "
+				.println("(å®Ÿè¡Œä¾‹) new LinkedList(\"A\", \"B\", \"C\", \"D\").toString(): "
 						+ new LinkedList("A", "B", "C", "D").toString());
 	}
 
