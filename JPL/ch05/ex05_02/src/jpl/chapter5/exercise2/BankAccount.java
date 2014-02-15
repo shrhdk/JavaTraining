@@ -4,19 +4,20 @@ import java.util.ArrayList;
 
 public class BankAccount {
 	private static long count = 0;
+
 	public static void resetCount() {
 		count = 0;
 	}
-	
+
 	public final long number = count++;
 	private long balance = 0;
 	private Action lastAct;
 	private History history = new History();
-	
+
 	public long showBalance() {
 		return balance;
 	}
-	
+
 	public void deposit(long amount) {
 		balance += amount;
 		lastAct = this.new Action("deposit", amount);
@@ -42,7 +43,7 @@ public class BankAccount {
 		private String act;
 		private long amount;
 
-		Action(String act, long amount) {
+		private Action(String act, long amount) {
 			this.act = act;
 			this.amount = amount;
 		}
@@ -53,15 +54,18 @@ public class BankAccount {
 		}
 	}
 
-	// BankAccount‚Ì‚½‚ß‚ÌƒNƒ‰ƒX‚È‚Ì‚ÅA“à•”ƒNƒ‰ƒX‚É‚·‚é‚×‚«‚Å‚ ‚éB
-	// ‚Ü‚½History‚ÍBankAccount‚Ìprivate‚ÈƒCƒ“ƒXƒ^ƒ“ƒXƒƒ“ƒo[‚ÉƒAƒNƒZƒX‚·‚é•K—v‚ª‚È‚¢‚Ì‚ÅA
-	// static‚Å‚æ‚¢B
+	// BankAccountï¿½Ì‚ï¿½ï¿½ß‚ÌƒNï¿½ï¿½ï¿½Xï¿½È‚Ì‚ÅAï¿½ï¿½ï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½Xï¿½É‚ï¿½ï¿½ï¿½×‚ï¿½ï¿½Å‚ï¿½ï¿½ï¿½B
+	// ï¿½Ü‚ï¿½Historyï¿½ï¿½BankAccountï¿½ï¿½privateï¿½ÈƒCï¿½ï¿½ï¿½Xï¿½^ï¿½ï¿½ï¿½Xï¿½ï¿½ï¿½ï¿½ï¿½oï¿½[ï¿½ÉƒAï¿½Nï¿½Zï¿½Xï¿½ï¿½ï¿½ï¿½Kï¿½vï¿½ï¿½ï¿½È‚ï¿½ï¿½Ì‚ÅA
+	// staticï¿½Å‚æ‚¢ï¿½B
 	public static class History {
 
 		int index = 0;
 		ArrayList<Action> history = new ArrayList<Action>();
 
-		public void add(Action action) {
+		private History() {
+		}
+
+		protected void add(Action action) {
 			if (0 <= history.size() && history.size() < 10) {
 				history.add(action);
 			} else if (history.size() == 10) {
@@ -70,13 +74,15 @@ public class BankAccount {
 			}
 		}
 
-		public boolean hasNext() {
+		protected boolean hasNext() {
 			if (0 <= index && index < history.size() - 1)
 				return true;
 			else if (index == history.size()) {
 				return false;
 			} else {
-				throw new AssertionError(String.format("Index is %d and history size is %d", index, history.size()));
+				throw new AssertionError(String.format(
+						"Index is %d and history size is %d", index,
+						history.size()));
 			}
 		}
 
@@ -86,7 +92,9 @@ public class BankAccount {
 			else if (index == history.size()) {
 				return null;
 			} else {
-				throw new AssertionError(String.format("Index is %d and history size is %d", index, history.size()));
+				throw new AssertionError(String.format(
+						"Index is %d and history size is %d", index,
+						history.size()));
 			}
 		}
 	}
