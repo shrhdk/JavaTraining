@@ -1,0 +1,4 @@
+Try 1,000 times with/without Yield
+
+With    Yield -> Dead lock: 1 / 1000
+Without Yield -> Dead lock: 4 / 1000
