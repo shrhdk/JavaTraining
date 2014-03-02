@@ -18,7 +18,7 @@ public class ThreadGroupManager {
 			public void run() {
 				for (;;) {
 					while (!stopped) {
-						printThreadRecursively(group);
+						printThreadRecursively(group, 0);
 						out.println();
 						try {
 							sleep(1000);
@@ -35,7 +35,7 @@ public class ThreadGroupManager {
 		stopped = true;
 	}
 
-	private void printThreadRecursively(ThreadGroup group) {
+	private void printThreadRecursively(ThreadGroup group, int depth) {
 
 		int threadCount = group.activeCount();
 		int groupCount = group.activeGroupCount();
@@ -43,14 +43,12 @@ public class ThreadGroupManager {
 		// Print ThreadGroup
 		out.println(getTabs(depth) + "+" + group.getName());
 
-		depth++;
-
 		// Print Thread
 		Thread[] threads = new Thread[threadCount];
 		group.enumerate(threads, false);
 		for (Thread thread : threads) {
 			if (thread != null)
-				out.println(getTabs(depth) + "-" + thread.getName());
+				out.println(getTabs(depth + 1) + "-" + thread.getName());
 		}
 
 		// Recursive call
@@ -58,10 +56,8 @@ public class ThreadGroupManager {
 		group.enumerate(threadGroups, false);
 		for (ThreadGroup threadGroup : threadGroups) {
 			if (threadGroup != null)
-				printThreadRecursively(threadGroup);
+				printThreadRecursively(threadGroup, depth + 1);
 		}
-
-		depth--;
 	}
 
 	private String getTabs(int width) {
