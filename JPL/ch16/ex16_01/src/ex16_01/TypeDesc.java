@@ -16,21 +16,21 @@ public class TypeDesc {
 		}
 	}
 
-	// デフォルトで標準出力に表示する
+	// デフォルトで標準出力に表示する
 	private java.io.PrintStream out = System.out;
 
-	// 型名にラベル付けする printType() で使用される
+	// 型名にラベル付けする printType() で使用される
 	private static String[] basic = { "class", "interface", "enum",
 			"annotation" };
 	private static String[] supercl = { "etextends", "implements" };
 	private static String[] iFace = { null, "extends" };
 
 	private void printType(Type type, int depth, String[] labels) {
-		// 再帰呼び出し停止: スーパータイプが存在しない
+		// 再帰呼び出し停止: スーパータイプが存在しない
 		if (type == null)
 			return;
 
-		// Type をClass オブジェヲトに変換する
+		// TypeをClassオブジェクトに変換する
 		Class<?> cls = null;
 		if (type instanceof Class<?>)
 			cls = (Class<?>) type;
@@ -47,7 +47,7 @@ public class TypeDesc {
 		out.print(labels[kind] + " ");
 		out.print(cls.getCanonicalName());
 
-		// あれば、ジェネリック型パラメータを表示
+		// あれば、ジェネリック型パラメータを表示
 		TypeVariable<?>[] params = cls.getTypeParameters();
 		if (params.length > 0) {
 			out.print('<');
@@ -59,14 +59,14 @@ public class TypeDesc {
 		} else
 			out.println();
 
-		// このクラスが実装しているすべてのインタフェースを表示
+		// このクラスが実装しているすべてのインタフェースを表示
 		Type[] interfaces = cls.getGenericInterfaces();
 		for (Type iface : interfaces) {
 
 			printType(iface, depth + 1, cls.isInterface() ? iFace : supercl);
 		}
 
-		// スーパクラスに対して再帰
+		// スーパークラスに対して再帰
 		if (cls.getGenericSuperclass() != Object.class) {
 			printType(cls.getGenericSuperclass(), depth + 1, supercl);
 		}
