@@ -33,6 +33,8 @@ public class ThreadPool {
 	
 	private final Thread runner = new RunnerThread();
 
+	// Constructor
+	
 	/**
 	 * Constructs ThreadPool.
 	 * 
@@ -124,7 +126,7 @@ public class ThreadPool {
 		}
 	}
 	
-	// Utility Method
+	// Private utility Method
 
 	private synchronized void offer(Runnable runnable) {
 		while (queueSize <= queue.size()) {
@@ -177,6 +179,7 @@ public class ThreadPool {
 						}
 					}
 					
+					// Start new thread
 					Runnable task = poll();
 					if (task != null) {
 						new Thread(group, task).start();
