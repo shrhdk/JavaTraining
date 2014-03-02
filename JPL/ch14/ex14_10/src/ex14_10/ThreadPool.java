@@ -22,19 +22,18 @@ import java.util.Queue;
 public class ThreadPool {
 
 	private static final int PERIOD = 100;
-	
-	private State state = State.IDLE;
 
 	private final ThreadGroup group = new ThreadGroup("ThreadLoop");
 	private final Queue<Runnable> queue = new LinkedList<Runnable>();
 
 	private final int numberOfThreads;
 	private final int queueSize;
-	
+
+	private State state = State.IDLE;
 	private final Thread runner = new RunnerThread();
 
 	// Constructor
-	
+
 	/**
 	 * Constructs ThreadPool.
 	 * 
@@ -55,12 +54,12 @@ public class ThreadPool {
 
 		this.numberOfThreads = numberOfThreads;
 		this.queueSize = queueSize;
-		
+
 		runner.start();
 	}
 
 	// API
-	
+
 	/**
 	 * Starts threads.
 	 * 
@@ -68,7 +67,8 @@ public class ThreadPool {
 	 *             if threads has been already started.
 	 */
 	public synchronized void start() {
-		switch(state) {
+		assert state != null;
+		switch (state) {
 		case IDLE:
 			state = State.RUNNING;
 			break;
@@ -84,11 +84,12 @@ public class ThreadPool {
 	 *             if threads has not been started.
 	 */
 	public synchronized void stop() {
-		switch(state) {
+		assert state != null;
+		switch (state) {
 		case IDLE:
 			throw new IllegalStateException();
 		case RUNNING:
-			while(1 <= queue.size() || 1 <= group.activeCount()) {
+			while (1 <= queue.size() || 1 <= group.activeCount()) {
 				try {
 					wait(PERIOD);
 				} catch (InterruptedException e) {
@@ -114,10 +115,11 @@ public class ThreadPool {
 	 *             if this pool has not been started yet.
 	 */
 	public synchronized void dispatch(Runnable runnable) {
-		if(runnable == null)
+		if (runnable == null)
 			throw new NullPointerException();
-		
-		switch(state) {
+
+		assert state != null;
+		switch (state) {
 		case IDLE:
 			throw new IllegalStateException();
 		case RUNNING:
@@ -125,7 +127,7 @@ public class ThreadPool {
 			break;
 		}
 	}
-	
+
 	// Private utility Method
 
 	private synchronized void offer(Runnable runnable) {
@@ -153,7 +155,7 @@ public class ThreadPool {
 		notifyAll();
 		return runnable;
 	}
-	
+
 	// Runner Thread
 
 	private class RunnerThread extends Thread {
@@ -178,7 +180,7 @@ public class ThreadPool {
 							return;
 						}
 					}
-					
+
 					// Start new thread
 					Runnable task = poll();
 					if (task != null) {
@@ -188,7 +190,7 @@ public class ThreadPool {
 			}
 		}
 	}
-	
+
 	// Internal State
 
 	private enum State {
