@@ -31,6 +31,7 @@ public class ThreadPool {
 
 	private State state = State.IDLE;
 	private final Thread runner = new RunnerThread();
+    private final DispatchableThread[] pool;
 
 	// Constructor
 
@@ -54,6 +55,11 @@ public class ThreadPool {
 
 		this.numberOfThreads = numberOfThreads;
 		this.queueSize = queueSize;
+        this.pool = new DispatchableThread[numberOfThreads];
+        for(int i = 0; i < pool.length; i++) {
+            pool[i] = new DispatchableThread(group);
+            pool[i].start();
+        }
 
 		runner.start();
 	}
@@ -89,13 +95,7 @@ public class ThreadPool {
 		case IDLE:
 			throw new IllegalStateException();
 		case RUNNING:
-			while (1 <= queue.size() || 1 <= group.activeCount()) {
-				try {
-					wait(PERIOD);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+            stopSynchronously();
 			state = State.IDLE;
 			break;
 		}
@@ -156,9 +156,35 @@ public class ThreadPool {
 		return runnable;
 	}
 
+    private synchronized void dispatchToThread(Runnable runnable) {
+        for(DispatchableThread thread : pool) {
+            if(thread.isAvailable()) {
+                thread.dispatch(runnable);
+                break;
+            }
+        }
+    }
+
+    private synchronized  void stopSynchronously() {
+        group.interrupt();
+
+        while (1 <= queue.size() || 1 <= group.activeCount()) {
+            try {
+                wait(PERIOD);
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+    }
+
 	// Runner Thread
 
 	private class RunnerThread extends Thread {
+
+        {
+            setName("RunnerThread");
+        }
+
 		@Override
 		public void run() {
 			synchronized (ThreadPool.this) {
@@ -172,21 +198,17 @@ public class ThreadPool {
 						}
 					}
 
-					// Wait for thread number
-					while (numberOfThreads <= group.activeCount()) {
-						try {
-							ThreadPool.this.wait(PERIOD);
-						} catch (InterruptedException e) {
-							return;
-						}
-					}
-
-					// Start new thread
+					// Dispatch to thread
 					Runnable task = poll();
-					if (task != null) {
-						new Thread(group, task).start();
-					}
-				}
+                    if(task != null)
+					    dispatchToThread(task);
+
+                    try {
+                        ThreadPool.this.wait(PERIOD);
+                    } catch (InterruptedException e) {
+                        // No problem
+                    }
+                }
 			}
 		}
 	}
@@ -195,5 +217,47 @@ public class ThreadPool {
 
 	private enum State {
 		IDLE, RUNNING
+	}
+}
+
+class DispatchableThread extends Thread {
+
+    private volatile boolean isInterrupted = false;
+	private volatile Runnable runnable;
+
+    public DispatchableThread(ThreadGroup group) {
+        super(group, "");
+    }
+
+	public synchronized void dispatch(Runnable runnable) {
+		this.runnable = runnable;
+        notifyAll();
+	}
+
+    public boolean isAvailable() {
+        return runnable == null;
+    }
+
+    @Override
+    public void interrupt() {
+        isInterrupted = true;
+    }
+
+	@Override
+	public synchronized void run() {
+        do {
+            while(runnable == null) {
+                try {
+                    wait(100);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                if(isInterrupted) {
+                    return;
+                }
+            }
+            runnable.run();
+            runnable = null;
+        } while(!isInterrupted);
 	}
 }

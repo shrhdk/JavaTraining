@@ -60,13 +60,7 @@ public class ThreadPoolTest {
 		public synchronized void run() {
 			currentCount++;
 			notifyAll();
-			while (currentCount < latchCount) {
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+            Thread.yield();
 		}
 		
 		synchronized void waitForLatchCount() {
@@ -223,7 +217,7 @@ public class ThreadPoolTest {
 		
 		for (LatchTask t: tasks)
 			t.waitForLatchCount();
-				
+
 		tp.stop();
 	}
 	@Test
@@ -281,7 +275,7 @@ public class ThreadPoolTest {
 		final int numberOfThreads = 10;
 		ThreadPool tp = new ThreadPool(10,numberOfThreads);
 		tp.start();
-		for (int i = 0; i < numberOfThreads; i++)
+		for (int i = 0; i < numberOfThreads * 3; i++)
 			tp.dispatch(task);
 		// By the specification, stop() will wait for the terminations of all threads.
 		tp.stop();
