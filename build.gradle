@@ -1,0 +1,14 @@
+subprojects {
+	repositories {
+		mavenCentral()
+	}
+	
+	apply plugin: 'java'
+	sourceSets {
+		main { java { srcDir 'java' } }
+		test { java { srcDir 'test' } }
+	}
+	dependencies {
+		testCompile 'junit:junit:4.11'
+	}
+}
