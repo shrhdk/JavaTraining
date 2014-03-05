@@ -1,5 +1,7 @@
 package Interpret;
 
+import com.sun.jdi.Value;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -8,7 +10,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.*;
 
-public class ObjectViewer extends Frame {
+public class ObjectViewer extends ValueDialog implements ValueDialogListener {
 
     private final Object object;
 
@@ -27,8 +29,8 @@ public class ObjectViewer extends Frame {
     private TextField[] argumentsFields;
     private final Button executeMethodButton = new Button("Execute Method");
 
-    public ObjectViewer(final Object object) {
-        super();
+    public ObjectViewer(Dialog owner, ValueDialogListener listener, final Object object) {
+        super(owner, object.getClass().getName(), listener);
 
         setSize(640, 640);
         setLayout(new GridLayout(4, 2));
@@ -64,7 +66,7 @@ public class ObjectViewer extends Frame {
                 field = fields[fieldList.getSelectedIndex()];
                 try {
                     field.setAccessible(true);
-                    field.set(object, Primitive.toObject(field.getType(), fieldField.getText()));
+                    field.set(object, Utility.toObject(field.getType(), fieldField.getText()));
                 } catch (Throwable e) {
                     showMessage("Fail: " + e.getMessage());
                     updateFieldField();
@@ -143,10 +145,10 @@ public class ObjectViewer extends Frame {
             Object[] arguments = new Object[argumentsFields.length];
             try {
                 for (int i = 0; i < arguments.length; i++) {
-                    arguments[i] = Primitive.toObject(types[i], argumentsFields[i].getText());
+                    arguments[i] = Utility.toObject(types[i], argumentsFields[i].getText());
                 }
                 return_ = method.invoke(object, arguments);
-                new ObjectViewer(object);
+                new ObjectViewer(this, this, object);
             } catch (Throwable e) {
                 showMessage("Fail: " + e.getMessage());
             }
@@ -156,5 +158,10 @@ public class ObjectViewer extends Frame {
 
     private void showMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
+    }
+
+    @Override
+    public void onDialogClose(Object return_) {
+
     }
 }

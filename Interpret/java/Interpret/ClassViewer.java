@@ -1,132 +1,97 @@
 package Interpret;
 
-import javax.swing.*;
 import java.awt.event.*;
 import java.lang.reflect.*;
 
+import static Interpret.Utility.*;
+
 import java.awt.*;
 
-public class ClassViewer extends Frame {
+public class ClassViewer extends ValueDialog {
 
-    private Object object;
-    private Constructor constructor;
-    private Constructor[] constructors;
-    private final TextField classNameField = new TextField("Type class name here.");
-    private final List constructorList = new List();
-    private final Panel argumentsFieldsPanel = new Panel();
-    private Button constructButton = new Button("Construct");
-    private TextField[] argumentsFields;
+    // Data
 
+    private final Class<?> class_;
 
-    public ClassViewer() {
-        super();
+    // API
 
-        setSize(640, 480);
-        setLayout(new GridLayout(4, 1));
+    public ClassViewer(Dialog owner, ValueDialogListener listener) {
+        this(owner, listener, null);
+    }
 
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e)  {
-                ClassViewer.this.setVisible(false);
-            }
-        });
+    public ClassViewer(Dialog owner, ValueDialogListener listener, Class<?> class_) {
+        super(owner, class_ == null ? "Class Viewer" : class_.getName(), listener);
 
-        classNameField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyTyped(KeyEvent keyEvent) {
-                updateConstructorList();
-            }
-        });
+        this.class_ = class_;
 
-        constructorList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                constructor = constructors[constructorList.getSelectedIndex()];
-                updateConstructorArgumentFields();
-            }
-        });
-
-        constructButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                construct();
-                System.out.println(object);
-            }
-        });
-
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                return;
-            }
-        });
-
-        add(classNameField);
-        add(constructorList);
-        add(argumentsFieldsPanel);
-        add(constructButton);
+        setUpComponent();
 
         setVisible(true);
     }
 
-    private void updateConstructorList() {
-        constructorList.removeAll();
-        String className = classNameField.getText();
+    // GUI
 
-        try {
-            Class<?> class_ = Class.forName(className);
-            constructors = class_.getDeclaredConstructors();
-            for (Constructor constructor : constructors) {
-                constructorList.add(constructor.toString());
-            }
-        } catch (ClassNotFoundException e) {
-            return;
-        }
+    private ClassNameField classNameField;
+    private ConstructorList constructorList;
+    private ArgumentList argumentList;
+    private Button constructButton;
+
+    private void setUpComponent() {
+        setSize(640, 480);
+        setLayout(new GridLayout(4, 1));
+
+        classNameField = new ClassNameField();
+        classNameField.setClassNameFieldListener(classNameFieldListener);
+
+        constructorList = new ConstructorList(this, constructListListener, null);
+
+        argumentList = new ArgumentList(this, null);
+
+        constructButton = new Button("Construct Object");
+        constructButton.addActionListener(constructButtonListener);
+
+        add(classNameField);
+        add(constructorList);
+        add(argumentList);
+        add(constructButton);
     }
 
-    private void updateConstructorArgumentFields() {
-        assert constructor != null;
+    // Listener
 
-        Type[] types = constructor.getParameterTypes();
-
-        argumentsFields = new TextField[types.length];
-
-        argumentsFieldsPanel.removeAll();
-        argumentsFieldsPanel.setLayout(new GridLayout(types.length, 2));
-
-        for (int i = 0; i < types.length; i++) {
-            argumentsFields[i] = new TextField();
-            argumentsFieldsPanel.add(new Label(String.valueOf(i + 1)));
-            argumentsFieldsPanel.add(argumentsFields[i]);
+    private ClassNameField.Listener classNameFieldListener = new ClassNameField.Listener() {
+        @Override
+        public void onChange(Class<?> class_) {
+            constructorList.setConstructors(class_.getConstructors());
         }
-    }
+    };
 
-    private void construct() {
-        assert constructor != null;
-        object = null;
-        if (constructor.getParameterTypes().length == 0) {
-            try {
-                object = constructor.newInstance();
-                new ObjectViewer(object);
-            } catch (Throwable e) {
-                showMessage("Fail: " + e.getMessage());
-            }
-        } else {
-            Class<?>[] types = constructor.getParameterTypes();
-            Object[] arguments = new Object[argumentsFields.length];
-            try {
-                for (int i = 0; i < arguments.length; i++) {
-                    arguments[i] = Primitive.toObject(types[i], argumentsFields[i].getText());
+    private ConstructorList.Listener constructListListener = new ConstructorList.Listener() {
+        @Override
+        public void onChange(Constructor constructor) {
+            if(constructor != null)
+                argumentList.setTypes(constructor.getParameterTypes());
+        }
+    };
+
+    private ActionListener constructButtonListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            Constructor constructor = constructorList.getSelectedConstructor();
+            if(constructor != null) {
+                try {
+                    Object object = construct(constructor, argumentList.getValues());
+                    new ObjectViewer(ClassViewer.this, valueDialogListener, object);
+                } catch(Throwable e) {
+                    showMessage(ClassViewer.this, e.getMessage());
                 }
-                object = constructor.newInstance(arguments);
-                new ObjectViewer(object);
-            } catch (Throwable e) {
-                showMessage("Fail: " + e.getMessage());
             }
         }
-    }
+    };
 
-    private void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message);
-    }
+    private ValueDialogListener valueDialogListener = new ValueDialogListener() {
+        @Override
+        public void onDialogClose(Object returnValue) {
+            return_(returnValue);
+        }
+    };
 }
-

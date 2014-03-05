@@ -2,6 +2,6 @@ package Interpret;
 
 public class Interpret {
     public static void main(String[] args) {
-        new ClassViewer();
+        new ClassViewer(null, null, null);
     }
 }
