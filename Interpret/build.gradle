@@ -1,0 +1,11 @@
+task deployJar(type: Copy, dependsOn: jar)  {
+	from 'build/libs/Interpret.jar'
+	into './'
+}
+
+jar {
+	manifest {
+		attributes 'Main-Class': 'Interpret.Interpret'
+	}
+	from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+}

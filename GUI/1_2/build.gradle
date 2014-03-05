@@ -1,0 +1,12 @@
+task deployJar(type: Copy, dependsOn: jar)  {
+	from 'build/libs/1_2.jar'
+	into './'
+	rename { 'Tokei.jar' }
+}
+
+jar {
+	manifest {
+		attributes 'Main-Class': 'GUI1_2.Tokei'
+	}
+	from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+}
