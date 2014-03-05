@@ -4,10 +4,16 @@ subprojects {
 	}
 	
 	apply plugin: 'java'
+
 	sourceSets {
 		main { java { srcDir 'java' } }
 		test { java { srcDir 'test' } }
 	}
+
+	def defaultEncoding = 'UTF-8'
+	tasks.withType(AbstractCompile) each { it.options.encoding = defaultEncoding }
+	tasks.withType(GroovyCompile) each { it.groovyOptions.encoding = defaultEncoding }
+
 	dependencies {
 		testCompile 'junit:junit:4.11'
 	}
