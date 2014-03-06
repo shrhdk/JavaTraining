@@ -19,7 +19,7 @@ import org.junit.Test;
  * 
  * @author Yoshiki Shibata
  */
-public class ThreadPoolTest {
+public class TestThreadPool {
 
 	/**
 	 * Simple counter task which counts the number of invocation of run() method.
@@ -60,7 +60,13 @@ public class ThreadPoolTest {
 		public synchronized void run() {
 			currentCount++;
 			notifyAll();
-            Thread.yield();
+			while (currentCount < latchCount) {
+				try {
+					wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		synchronized void waitForLatchCount() {
@@ -217,7 +223,7 @@ public class ThreadPoolTest {
 		
 		for (LatchTask t: tasks)
 			t.waitForLatchCount();
-
+				
 		tp.stop();
 	}
 	@Test
@@ -275,7 +281,7 @@ public class ThreadPoolTest {
 		final int numberOfThreads = 10;
 		ThreadPool tp = new ThreadPool(10,numberOfThreads);
 		tp.start();
-		for (int i = 0; i < numberOfThreads * 3; i++)
+		for (int i = 0; i < numberOfThreads; i++)
 			tp.dispatch(task);
 		// By the specification, stop() will wait for the terminations of all threads.
 		tp.stop();
