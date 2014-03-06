@@ -35,11 +35,12 @@ public class ClassViewer extends ValueDialog {
     private ConstructorList constructorList;
     private ArgumentList argumentList;
     private Button constructButton;
+    private Button cancelButton;
 
     private void setUpComponent() {
         setSize(640, 480);
 
-        setLayout(new GridLayout(4, 1));
+        setLayout(new GridLayout(5, 1));
 
         classNameField = new ClassNameField();
         classNameField.setClassNameFieldListener(classNameFieldListener);
@@ -51,10 +52,14 @@ public class ClassViewer extends ValueDialog {
         constructButton = new Button("Construct Object");
         constructButton.addActionListener(constructButtonListener);
 
+        cancelButton = new Button("Cancel");
+        cancelButton.addActionListener(cancelButtonListener);
+
         add(classNameField);
         add(constructorList);
         add(argumentList);
         add(constructButton);
+        add(cancelButton);
 
         if (class_ != null) {
             classNameField.setEnabled(false);
@@ -92,6 +97,13 @@ public class ClassViewer extends ValueDialog {
                     showMessage(ClassViewer.this, e.getMessage());
                 }
             }
+        }
+    };
+
+    private ActionListener cancelButtonListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            return_(null);
         }
     };
 

@@ -13,7 +13,7 @@ public class FieldList extends Panel {
 
     // API
 
-    public FieldList(Dialog owner, Object object, Field... fields) {
+    public FieldList(Dialog owner, Object object) {
         if(owner == null)
             throw new IllegalArgumentException();
         else if(object == null)
@@ -21,7 +21,9 @@ public class FieldList extends Panel {
 
         this.owner = owner;
         this.object = object;
-        this.fields = fields;
+        this.fields = object.getClass().getDeclaredFields();
+
+        setUpComponent();
     }
 
     // GUI
@@ -34,6 +36,7 @@ public class FieldList extends Panel {
             setLayout(new GridLayout(fields.length, 2));
             for(int i = 0; i < fields.length; i++) {
                 add(new Label(fields[i].getName()));
+                add(new FieldForm(owner, object, fields[i]));
             }
         }
     }

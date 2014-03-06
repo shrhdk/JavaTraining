@@ -1,167 +1,100 @@
 package Interpret;
 
-import com.sun.jdi.Value;
-
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.lang.reflect.*;
 
-public class ObjectViewer extends ValueDialog implements ValueDialogListener {
+import static Interpret.Utility.*;
 
+public class ObjectViewer extends ValueDialog {
+
+    // Data
     private final Object object;
-
-    // For Field
-    private Field field;
-    private final Field[] fields;
-    private final List fieldList = new List();
-    private final TextField fieldField = new TextField();
-    private final Button updateFieldButton = new Button("Update Field");
-
-    // For Method
-    private Method method;
     private final Method[] methods;
-    private final List methodList = new List();
-    private final Panel argumentsFieldsPanel = new Panel();
-    private TextField[] argumentsFields;
-    private final Button executeMethodButton = new Button("Execute Method");
+
+    // GUI Component
+    private final Label fieldLabel = new Label("Field");
+    private final Label methodLabel = new Label("Method");
+    private final FieldList fieldList;
+    private final MethodList methodList;
+    private final ArgumentList argumentList;
+    private final Button cancelButton = new Button("Cancel");
+    private final Button okButton = new Button("OK");
+    private final Button invokeMethodButton = new Button("Execute Method");
 
     public ObjectViewer(Dialog owner, ValueDialogListener listener, final Object object) {
-        super(owner, object.getClass().getName(), listener);
+        super(owner, object.getClass().getName() + " " + object.toString(), listener);
 
-        setSize(640, 640);
-        setLayout(new GridLayout(4, 2));
+        // Check arguments
+        if(object == null)
+            throw new IllegalArgumentException();
 
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e)  {
-                ObjectViewer.this.setVisible(false);
-            }
-        });
-
+        // Stash arguments
         this.object = object;
-        fields = object.getClass().getDeclaredFields();
         methods = object.getClass().getMethods();
 
-        for (Method method : methods) {
-            methodList.add(method.toString());
-        }
-        for (Field field : fields) {
-            fieldList.add(field.toString());
-        }
+        // Setup GUI Component
+        fieldList = new FieldList(this, object);
+        methodList = new MethodList(this, methodListListener, methods);
+        argumentList = new ArgumentList(this, null);
 
-        // Add Event Listener for Field
-        fieldList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                field = fields[fieldList.getSelectedIndex()];
-                updateFieldField();
-            }
-        });
-        updateFieldButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                field = fields[fieldList.getSelectedIndex()];
-                try {
-                    field.setAccessible(true);
-                    field.set(object, Utility.toObject(field.getType(), fieldField.getText()));
-                } catch (Throwable e) {
-                    showMessage("Fail: " + e.getMessage());
-                    updateFieldField();
-                }
-            }
-        });
+        // Add listener to button
+        cancelButton.addActionListener(cancelButtonListener);
+        okButton.addActionListener(okButtonListener);
+        invokeMethodButton.addActionListener(invokeMethodButtonListener);
 
-        // Add Event Listener for Method
-        methodList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                method = methods[methodList.getSelectedIndex()];
-                updateMethodArgumentFields();
-            }
-        });
-        executeMethodButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                executeMethod();
-            }
-        });
+        setSize(1000, 640);
+        setLayout(new GridLayout(4, 2));
 
         // Add Components
-        add(new Label("Field"));
-        add(new Label("Method"));
-        add(fieldList);
+        add(methodLabel);
+        add(fieldLabel);
         add(methodList);
-        add(fieldField);
-        add(argumentsFieldsPanel);
-        add(updateFieldButton);
-        add(executeMethodButton);
+        add(fieldList);
+        add(argumentList);
+        add(cancelButton);
+        add(invokeMethodButton);
+        add(okButton);
 
         setVisible(true);
     }
 
-    private void updateFieldField() {
-        assert field != null;
-        try {
-            field.setAccessible(true);
-            fieldField.setText(field.get(object).toString());
-        } catch (Throwable e) {
-            e.printStackTrace();
+    // Listener
+
+    private MethodList.Listener methodListListener = new MethodList.Listener() {
+        @Override
+        public void onChange(Method method) {
+            if (method != null)
+                argumentList.setTypes(method.getParameterTypes());
         }
-    }
+    };
 
-    private void updateMethodArgumentFields() {
-        assert method != null;
-
-        Type[] types = method.getParameterTypes();
-
-        argumentsFields = new TextField[types.length];
-
-        argumentsFieldsPanel.removeAll();
-        argumentsFieldsPanel.setLayout(new GridLayout(types.length, 2));
-
-        for (int i = 0; i < types.length; i++) {
-            argumentsFields[i] = new TextField();
-            argumentsFieldsPanel.add(new Label(String.valueOf(i + 1)));
-            argumentsFieldsPanel.add(argumentsFields[i]);
+    private ActionListener cancelButtonListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            return_(null);
         }
-    }
+    };
 
-    private void executeMethod() {
-        assert method != null;
-        Object return_ = null;
+    private ActionListener okButtonListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            return_(object);
+        }
+    };
 
-        Class<?>[] types = method.getParameterTypes();
-
-        if (types.length == 0) {
-            try {
-                return_ = method.invoke(object);
-            } catch (Throwable e) {
-                showMessage("Fail: " + e.getMessage());
-            }
-        } else {
-            Object[] arguments = new Object[argumentsFields.length];
-            try {
-                for (int i = 0; i < arguments.length; i++) {
-                    arguments[i] = Utility.toObject(types[i], argumentsFields[i].getText());
+    private ActionListener invokeMethodButtonListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            Method method = methodList.getSelectedMethod();
+            if (method != null) {
+                try {
+                    Object returnValue = invoke(object, method, argumentList.getValues());
+                    showMessage(ObjectViewer.this, returnValue.toString());
+                } catch (Throwable e) {
+                    showMessage(ObjectViewer.this, e.getMessage());
                 }
-                return_ = method.invoke(object, arguments);
-                new ObjectViewer(this, this, object);
-            } catch (Throwable e) {
-                showMessage("Fail: " + e.getMessage());
             }
         }
-        showMessage("Success: " + return_.toString());
-    }
-
-    private void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message);
-    }
-
-    @Override
-    public void onDialogClose(Object return_) {
-
-    }
+    };
 }

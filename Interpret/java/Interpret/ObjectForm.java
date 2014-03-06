@@ -9,7 +9,7 @@ import static Interpret.Utility.toObject;
 
 public class ObjectForm extends Panel {
 
-    private Dialog owner;
+    private final Dialog owner;
     private final Class<?> class_;
     private Object generatedObject;
 
@@ -21,6 +21,7 @@ public class ObjectForm extends Panel {
         else if(class_ == null)
             throw new IllegalArgumentException();
 
+        this.owner = owner;
         this.class_ = class_;
 
         setUpComponent();
@@ -54,6 +55,8 @@ public class ObjectForm extends Panel {
         doLayout();
     }
 
+    // Listener
+
     private class generateButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
@@ -65,7 +68,10 @@ public class ObjectForm extends Panel {
         @Override
         public void onDialogClose(Object returnValue) {
             generatedObject = returnValue;
-            generateButton.setLabel(generatedObject.toString());
+            if(generatedObject != null)
+                generateButton.setLabel(generatedObject.toString());
+            else
+                generateButton.setLabel(class_.getCanonicalName());
         }
     }
 }
