@@ -7,6 +7,8 @@ package ex14_10;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import static ex14_10.LogUtility.logDebug;
+
 /**
  * Simple Thread Pool class.
  * <p/>
@@ -53,7 +55,7 @@ public class ThreadPool {
         this.queueSize = queueSize;
         this.pool = new DispatchableThread[numberOfThreads];
         for (int i = 0; i < pool.length; i++) {
-            pool[i] = new DispatchableThread(group);
+            pool[i] = new DispatchableThread(group, String.format("TaskThread-%02d", i + 1));
             pool[i].start();
         }
 
@@ -68,6 +70,8 @@ public class ThreadPool {
      * @throws IllegalStateException if threads has been already started.
      */
     public synchronized void start() {
+        logDebug("Enter");
+
         assert state != null;
         switch (state) {
             case IDLE:
@@ -78,6 +82,8 @@ public class ThreadPool {
             case STOPPING:
                 throw new IllegalStateException();
         }
+
+        logDebug("Return");
     }
 
     /**
@@ -86,6 +92,8 @@ public class ThreadPool {
      * @throws IllegalStateException if threads has not been started.
      */
     public synchronized void stop() {
+        logDebug("Enter");
+
         assert state != null;
         switch (state) {
             case IDLE:
@@ -98,6 +106,8 @@ public class ThreadPool {
             case STOPPING:
                 throw new IllegalStateException();
         }
+
+        logDebug("Return");
     }
 
     /**
@@ -110,6 +120,8 @@ public class ThreadPool {
      * @throws IllegalStateException if this pool has not been started yet.
      */
     public synchronized void dispatch(Runnable runnable) {
+        logDebug("Enter");
+
         if (runnable == null)
             throw new NullPointerException();
 
@@ -123,11 +135,15 @@ public class ThreadPool {
             case STOPPING:
                 throw new IllegalStateException();
         }
+
+        logDebug("Return");
     }
 
     // Private utility Method
 
     private synchronized void offer(Runnable runnable) {
+        logDebug("Enter");
+
         while (queueSize <= queue.size()) {
             try {
                 wait();
@@ -137,9 +153,13 @@ public class ThreadPool {
         }
         queue.offer(runnable);
         notifyAll();
+
+        logDebug("Return");
     }
 
     private synchronized Runnable poll() {
+        logDebug("Enter");
+
         while (queue.size() < 1) {
             try {
                 wait();
@@ -150,19 +170,27 @@ public class ThreadPool {
 
         Runnable runnable = queue.poll();
         notifyAll();
+
+        logDebug("Return");
+
         return runnable;
     }
 
     private synchronized void dispatchToThread(Runnable runnable) {
+        logDebug("Enter");
+
         for (DispatchableThread thread : pool) {
             if (thread.isAvailable()) {
                 thread.dispatch(runnable);
                 break;
             }
         }
+
+        logDebug("Return");
     }
 
     private synchronized void stopSynchronously() {
+        logDebug("Enter");
 
         while (1 <= queue.size()) {
             try {
@@ -183,6 +211,8 @@ public class ThreadPool {
         }
 
         runner.interrupt();
+
+        logDebug("Return");
     }
 
     // Runner Thread
@@ -195,6 +225,8 @@ public class ThreadPool {
 
         @Override
         public void run() {
+            logDebug("Enter");
+
             synchronized (ThreadPool.this) {
                 do {
                     // Wait for state
@@ -215,9 +247,12 @@ public class ThreadPool {
                         ThreadPool.this.wait(PERIOD);
                     } catch (InterruptedException e) {
                         // No problem
+                        return;
                     }
                 } while (!interrupted());
             }
+
+            logDebug("Return");
         }
     }
 
@@ -233,40 +268,52 @@ class DispatchableThread extends Thread {
     private volatile boolean isInterrupted = false;
     private volatile Runnable runnable;
 
-    public DispatchableThread(ThreadGroup group) {
-        super(group, "");
+    public DispatchableThread(ThreadGroup group, String name) {
+        super(group, name);
     }
 
     public synchronized void dispatch(Runnable runnable) {
+        logDebug("Enter");
+
         this.runnable = runnable;
         notifyAll();
+
+        logDebug("Return");
     }
 
     public boolean isAvailable() {
+        logDebug();
         return !isInterrupted && runnable == null;
     }
 
     @Override
     public synchronized void interrupt() {
+        logDebug("Enter");
+
         isInterrupted = true;
+        notifyAll();
+
+        logDebug("Return");
     }
 
     @Override
     public synchronized void run() {
+        logDebug("Enter");
+
         do {
-            while (runnable == null) {
+            while (isAvailable()) {
                 try {
-                    wait(10);
+                    wait();
                 } catch (InterruptedException e) {
                     return;
                 }
-                if (isInterrupted && runnable == null)
-                    return;
             }
             if (runnable != null) {
                 runnable.run();
                 runnable = null;
             }
         } while (!isInterrupted);
+
+        logDebug("Return");
     }
 }
