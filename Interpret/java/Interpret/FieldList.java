@@ -3,7 +3,7 @@ package Interpret;
 import java.awt.*;
 import java.lang.reflect.*;
 
-public class FieldsPanel extends Panel {
+public class FieldList extends Panel {
 
     // Data
 
@@ -13,7 +13,7 @@ public class FieldsPanel extends Panel {
 
     // API
 
-    public FieldsPanel(Dialog owner, Object object, Field... fields) {
+    public FieldList(Dialog owner, Object object, Field... fields) {
         if(owner == null)
             throw new IllegalArgumentException();
         else if(object == null)

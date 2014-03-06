@@ -32,6 +32,7 @@ public class ArgumentList extends Panel {
                 add(objectForms[i]);
             }
         }
+        doLayout();
     }
 
     public Object[] getValues() {

@@ -43,12 +43,15 @@ public class ObjectForm extends Panel {
         setLayout(new GridLayout(1, 1));
 
         generateButton.addActionListener(new generateButtonListener());
+        generateButton.setLabel(class_.getSimpleName());
 
         if(isPrimitive(class_)) {
             add(textField);
         } else {
             add(generateButton);
         }
+
+        doLayout();
     }
 
     private class generateButtonListener implements ActionListener {

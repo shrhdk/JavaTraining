@@ -20,7 +20,7 @@ public class ClassViewer extends ValueDialog {
     }
 
     public ClassViewer(Dialog owner, ValueDialogListener listener, Class<?> class_) {
-        super(owner, class_ == null ? "Class Viewer" : class_.getName(), listener);
+        super(owner, "Class Viewer", listener);
 
         this.class_ = class_;
 
@@ -38,6 +38,7 @@ public class ClassViewer extends ValueDialog {
 
     private void setUpComponent() {
         setSize(640, 480);
+
         setLayout(new GridLayout(4, 1));
 
         classNameField = new ClassNameField();
@@ -54,6 +55,12 @@ public class ClassViewer extends ValueDialog {
         add(constructorList);
         add(argumentList);
         add(constructButton);
+
+        if (class_ != null) {
+            classNameField.setEnabled(false);
+            classNameField.setText(class_.getCanonicalName());
+            classNameFieldListener.onChange(class_);
+        }
     }
 
     // Listener
@@ -68,7 +75,7 @@ public class ClassViewer extends ValueDialog {
     private ConstructorList.Listener constructListListener = new ConstructorList.Listener() {
         @Override
         public void onChange(Constructor constructor) {
-            if(constructor != null)
+            if (constructor != null)
                 argumentList.setTypes(constructor.getParameterTypes());
         }
     };
@@ -77,11 +84,11 @@ public class ClassViewer extends ValueDialog {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             Constructor constructor = constructorList.getSelectedConstructor();
-            if(constructor != null) {
+            if (constructor != null) {
                 try {
                     Object object = construct(constructor, argumentList.getValues());
                     new ObjectViewer(ClassViewer.this, valueDialogListener, object);
-                } catch(Throwable e) {
+                } catch (Throwable e) {
                     showMessage(ClassViewer.this, e.getMessage());
                 }
             }
