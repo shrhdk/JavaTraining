@@ -25,7 +25,7 @@ public class ArgumentList extends Panel {
             add(new Label("No argument"));
         } else {
             objectForms = new ObjectForm[types.length];
-            setLayout(new GridLayout(types.length, 1));
+            setLayout(new GridLayout(types.length + 1, 1));
             add(new Label("Input arguments"));
             for (int i = 0; i < types.length; i++) {
                 objectForms[i] = new ObjectForm(owner, types[i]);

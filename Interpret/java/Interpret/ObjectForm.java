@@ -40,6 +40,7 @@ public class ObjectForm extends Panel {
     private final Button generateButton = new Button();
 
     private void setUpComponent() {
+        setLayout(new GridLayout(1, 1));
 
         generateButton.addActionListener(new generateButtonListener());
 
