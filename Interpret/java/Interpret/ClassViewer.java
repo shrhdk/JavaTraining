@@ -62,7 +62,6 @@ public class ClassViewer extends ValueDialog {
         add(cancelButton);
 
         if (class_ != null) {
-            classNameField.setEnabled(false);
             classNameField.setText(class_.getCanonicalName());
             classNameFieldListener.onChange(class_);
         }
