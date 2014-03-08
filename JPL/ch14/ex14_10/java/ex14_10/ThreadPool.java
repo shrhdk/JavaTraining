@@ -85,13 +85,6 @@ public class ThreadPool {
 
         synchronized (mutexOfIsInterruptedAndQueue) {
             isInterrupted = true;
-            for (int i = 0; i < threads.length; i++) {
-                queue.offer(new Runnable() {
-                    @Override
-                    public void run() {
-                    }
-                });
-            }
             mutexOfIsInterruptedAndQueue.notifyAll();
         }
 
