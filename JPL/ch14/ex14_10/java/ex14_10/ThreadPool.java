@@ -26,7 +26,6 @@ public class ThreadPool {
     private boolean isInterrupted = false;
 
     private final int queueSize;
-    private final int numberOfThreads;
 
     private final WorkerThread[] threads;
     private final Queue<Runnable> queue = new LinkedList<Runnable>();
@@ -54,7 +53,6 @@ public class ThreadPool {
         }
 
         this.queueSize = queueSize;
-        this.numberOfThreads = numberOfThreads;
 
         threads = new WorkerThread[numberOfThreads];
     }
