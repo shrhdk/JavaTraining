@@ -23,17 +23,20 @@ import static ex14_10.LogUtility.logDebug;
  */
 public class ThreadPool {
 
-    private static final int PERIOD = 100;
+    private boolean isInterrupted = false;
+    private int numberOfAlive;
 
-    private final ThreadGroup group = new ThreadGroup("ThreadLoop");
+    private final int queueSize;
+    private final int numberOfThreads;
+
+    private final WorkerThread[] threads;
     private final Queue<Runnable> queue = new LinkedList<Runnable>();
 
-    private final int numberOfThreads;
-    private final int queueSize;
+    // State
 
-    private State state = State.IDLE;
-    private final Thread runner = new RunnerThread();
-    private final DispatchableThread[] pool;
+    private enum State {IDLE, RUNNING, STOPPING}
+
+    private volatile State state = State.IDLE;
 
     // Constructor
 
@@ -51,15 +54,10 @@ public class ThreadPool {
             throw new IllegalArgumentException();
         }
 
-        this.numberOfThreads = numberOfThreads;
         this.queueSize = queueSize;
-        this.pool = new DispatchableThread[numberOfThreads];
-        for (int i = 0; i < pool.length; i++) {
-            pool[i] = new DispatchableThread(group, String.format("TaskThread-%02d", i + 1));
-            pool[i].start();
-        }
+        this.numberOfThreads = numberOfThreads;
 
-        runner.start();
+        threads = new WorkerThread[numberOfThreads];
     }
 
     // API
@@ -72,16 +70,17 @@ public class ThreadPool {
     public synchronized void start() {
         logDebug("Enter");
 
-        assert state != null;
-        switch (state) {
-            case IDLE:
-                state = State.RUNNING;
-                break;
-            case RUNNING:
-                throw new IllegalStateException();
-            case STOPPING:
-                throw new IllegalStateException();
+        if (state != State.IDLE)
+            throw new IllegalStateException();
+
+        numberOfAlive = numberOfThreads;
+
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new WorkerThread();
+            threads[i].start();
         }
+
+        state = State.RUNNING;
 
         logDebug("Return");
     }
@@ -94,18 +93,34 @@ public class ThreadPool {
     public synchronized void stop() {
         logDebug("Enter");
 
-        assert state != null;
-        switch (state) {
-            case IDLE:
-                throw new IllegalStateException();
-            case RUNNING:
-                state = State.STOPPING;
-                stopSynchronously();
-                state = State.IDLE;
-                break;
-            case STOPPING:
-                throw new IllegalStateException();
+        if (state != State.RUNNING)
+            throw new IllegalStateException();
+
+        state = State.STOPPING;
+
+        // assert numberOfAlive == numberOfThreads : numberOfAlive + "/" + numberOfThreads;
+
+        isInterrupted = true;
+        for (int i = 0; i < threads.length; i++) {
+            queue.offer(new Runnable() {
+                @Override
+                public void run() {
+                }
+            });
         }
+        notifyAll();
+
+        while (0 < numberOfAlive) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // assert numberOfAlive == 0 : numberOfAlive + "/" + numberOfThreads;
+
+        state = State.IDLE;
 
         logDebug("Return");
     }
@@ -125,19 +140,15 @@ public class ThreadPool {
         if (runnable == null)
             throw new NullPointerException();
 
-        assert state != null;
-        switch (state) {
-            case IDLE:
-                throw new IllegalStateException();
-            case RUNNING:
-                offer(runnable);
-                break;
-            case STOPPING:
-                throw new IllegalStateException();
-        }
+        if (state != State.RUNNING)
+            throw new IllegalStateException();
+
+        offer(runnable);
 
         logDebug("Return");
     }
+
+    // Utility Method
 
     // Private utility Method
 
@@ -162,7 +173,10 @@ public class ThreadPool {
 
         while (queue.size() < 1) {
             try {
-                wait();
+                if (isInterrupted)
+                    return null;
+                else
+                    wait();
             } catch (InterruptedException e) {
                 return null;
             }
@@ -176,144 +190,19 @@ public class ThreadPool {
         return runnable;
     }
 
-    private synchronized void dispatchToThread(Runnable runnable) {
-        logDebug("Enter");
+    // Worker Thread Class
 
-        for (DispatchableThread thread : pool) {
-            if (thread.isAvailable()) {
-                thread.dispatch(runnable);
-                break;
-            }
-        }
-
-        logDebug("Return");
-    }
-
-    private synchronized void stopSynchronously() {
-        logDebug("Enter");
-
-        while (1 <= queue.size()) {
-            try {
-                wait(PERIOD);
-            } catch (InterruptedException e) {
-                return;
-            }
-        }
-
-        group.interrupt();
-
-        while (1 <= group.activeCount()) {
-            try {
-                wait(PERIOD);
-            } catch (InterruptedException e) {
-                return;
-            }
-        }
-
-        runner.interrupt();
-
-        logDebug("Return");
-    }
-
-    // Runner Thread
-
-    private class RunnerThread extends Thread {
-
-        {
-            setName("RunnerThread");
-        }
-
+    private class WorkerThread extends Thread {
         @Override
         public void run() {
-            logDebug("Enter");
-
-            synchronized (ThreadPool.this) {
-                do {
-                    // Wait for state
-                    while (state == ThreadPool.State.IDLE) {
-                        try {
-                            ThreadPool.this.wait();
-                        } catch (InterruptedException e) {
-                            return;
-                        }
-                    }
-
-                    // Dispatch to thread
-                    Runnable task = poll();
-                    if (task != null)
-                        dispatchToThread(task);
-
-                    try {
-                        ThreadPool.this.wait(PERIOD);
-                    } catch (InterruptedException e) {
-                        // No problem
-                        return;
-                    }
-                } while (!interrupted());
-            }
-
-            logDebug("Return");
-        }
-    }
-
-    // Internal State
-
-    private enum State {
-        IDLE, RUNNING, STOPPING
-    }
-}
-
-class DispatchableThread extends Thread {
-
-    private volatile boolean isInterrupted = false;
-    private volatile Runnable runnable;
-
-    public DispatchableThread(ThreadGroup group, String name) {
-        super(group, name);
-    }
-
-    public synchronized void dispatch(Runnable runnable) {
-        logDebug("Enter");
-
-        this.runnable = runnable;
-        notifyAll();
-
-        logDebug("Return");
-    }
-
-    public boolean isAvailable() {
-        logDebug();
-        return !isInterrupted && runnable == null;
-    }
-
-    @Override
-    public synchronized void interrupt() {
-        logDebug("Enter");
-
-        isInterrupted = true;
-        notifyAll();
-
-        logDebug("Return");
-    }
-
-    @Override
-    public synchronized void run() {
-        logDebug("Enter");
-
-        do {
-            while (isAvailable()) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    return;
+            Runnable runnable;
+            while (((runnable = poll()) != null) || !isInterrupted) {
+                runnable.run();
+                synchronized (ThreadPool.this) {
+                    numberOfAlive--;
+                    ThreadPool.this.notifyAll();
                 }
             }
-            if (runnable != null) {
-                runnable.run();
-                runnable = null;
-            }
-        } while (!isInterrupted);
-
-        logDebug("Return");
+        }
     }
 }
