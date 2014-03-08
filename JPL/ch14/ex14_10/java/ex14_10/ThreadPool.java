@@ -98,7 +98,7 @@ public class ThreadPool {
 
         state = State.STOPPING;
 
-        // assert numberOfAlive == numberOfThreads : numberOfAlive + "/" + numberOfThreads;
+        assert numberOfAlive == numberOfThreads : numberOfAlive + "/" + numberOfThreads;
 
         isInterrupted = true;
         for (int i = 0; i < threads.length; i++) {
@@ -118,7 +118,7 @@ public class ThreadPool {
             }
         }
 
-        // assert numberOfAlive == 0 : numberOfAlive + "/" + numberOfThreads;
+        assert numberOfAlive == 0 : numberOfAlive + "/" + numberOfThreads;
 
         state = State.IDLE;
 
@@ -195,13 +195,17 @@ public class ThreadPool {
     private class WorkerThread extends Thread {
         @Override
         public void run() {
-            Runnable runnable;
-            while (((runnable = poll()) != null) || !isInterrupted) {
-                runnable.run();
+            for (; ; ) {
+                Runnable runnable;
                 synchronized (ThreadPool.this) {
-                    numberOfAlive--;
-                    ThreadPool.this.notifyAll();
+                    runnable = poll();
+                    if (runnable == null && isInterrupted) {
+                        numberOfAlive--;
+                        ThreadPool.this.notifyAll();
+                        return;
+                    }
                 }
+                runnable.run();
             }
         }
     }
