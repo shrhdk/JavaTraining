@@ -64,7 +64,7 @@ public class ThreadPool {
      *
      * @throws IllegalStateException if threads has been already started.
      */
-    public synchronized void start() {
+    public void start() {
         logDebug("Enter");
 
         if (state != State.IDLE)
@@ -127,7 +127,7 @@ public class ThreadPool {
      * @throws NullPointerException  if runnable is null.
      * @throws IllegalStateException if this pool has not been started yet.
      */
-    public synchronized void dispatch(Runnable runnable) {
+    public void dispatch(Runnable runnable) {
         logDebug("Enter");
 
         if (runnable == null)
