@@ -24,7 +24,6 @@ import static ex14_10.LogUtility.logDebug;
 public class ThreadPool {
 
     private boolean isInterrupted = false;
-    private int numberOfAlive;
 
     private final int queueSize;
     private final int numberOfThreads;
@@ -73,8 +72,6 @@ public class ThreadPool {
         if (state != State.IDLE)
             throw new IllegalStateException();
 
-        numberOfAlive = numberOfThreads;
-
         for (int i = 0; i < threads.length; i++) {
             threads[i] = new WorkerThread();
             threads[i].start();
@@ -90,7 +87,7 @@ public class ThreadPool {
      *
      * @throws IllegalStateException if threads has not been started.
      */
-    public synchronized void stop() {
+    public void stop() {
         logDebug("Enter");
 
         if (state != State.RUNNING)
@@ -98,27 +95,25 @@ public class ThreadPool {
 
         state = State.STOPPING;
 
-        assert numberOfAlive == numberOfThreads : numberOfAlive + "/" + numberOfThreads;
-
-        isInterrupted = true;
-        for (int i = 0; i < threads.length; i++) {
-            queue.offer(new Runnable() {
-                @Override
-                public void run() {
-                }
-            });
+        synchronized (this) {
+            isInterrupted = true;
+            for (int i = 0; i < threads.length; i++) {
+                queue.offer(new Runnable() {
+                    @Override
+                    public void run() {
+                    }
+                });
+            }
+            notifyAll();
         }
-        notifyAll();
 
-        while (0 < numberOfAlive) {
+        for (Thread thread : threads) {
             try {
-                wait();
+                thread.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
-        assert numberOfAlive == 0 : numberOfAlive + "/" + numberOfThreads;
 
         state = State.IDLE;
 
@@ -200,8 +195,8 @@ public class ThreadPool {
                 synchronized (ThreadPool.this) {
                     runnable = poll();
                     if (runnable == null && isInterrupted) {
-                        numberOfAlive--;
                         ThreadPool.this.notifyAll();
+                        logDebug("Return");
                         return;
                     }
                 }
