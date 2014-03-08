@@ -7,13 +7,10 @@ package ex14_10;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import static ex14_10.LogUtility.logDebug;
-
 /**
  * Simple Thread Pool class.
  * <p/>
- * This class can be used to dispatch an Runnable object to be exectued by a
- * thread.
+ * This class can be used to dispatch an Runnable object to be executed by a thread.
  * <p/>
  * [Instruction] Implement one constructor and three methods. Don't forget to
  * write a Test program to test this class. Pay attention to @throws tags in the
@@ -23,12 +20,12 @@ import static ex14_10.LogUtility.logDebug;
  */
 public class ThreadPool {
 
+    private final Object mutexOfIsInterruptedAndQueue = new Object();
     private boolean isInterrupted = false;
+    private final Queue<Runnable> queue = new LinkedList<Runnable>();
 
     private final int queueSize;
-
     private final WorkerThread[] threads;
-    private final Queue<Runnable> queue = new LinkedList<Runnable>();
 
     // State
 
@@ -53,7 +50,6 @@ public class ThreadPool {
         }
 
         this.queueSize = queueSize;
-
         threads = new WorkerThread[numberOfThreads];
     }
 
@@ -65,8 +61,6 @@ public class ThreadPool {
      * @throws IllegalStateException if threads has been already started.
      */
     public void start() {
-        logDebug("Enter");
-
         if (state != State.IDLE)
             throw new IllegalStateException();
 
@@ -76,8 +70,6 @@ public class ThreadPool {
         }
 
         state = State.RUNNING;
-
-        logDebug("Return");
     }
 
     /**
@@ -86,14 +78,12 @@ public class ThreadPool {
      * @throws IllegalStateException if threads has not been started.
      */
     public void stop() {
-        logDebug("Enter");
-
         if (state != State.RUNNING)
             throw new IllegalStateException();
 
         state = State.STOPPING;
 
-        synchronized (this) {
+        synchronized (mutexOfIsInterruptedAndQueue) {
             isInterrupted = true;
             for (int i = 0; i < threads.length; i++) {
                 queue.offer(new Runnable() {
@@ -102,7 +92,7 @@ public class ThreadPool {
                     }
                 });
             }
-            notifyAll();
+            mutexOfIsInterruptedAndQueue.notifyAll();
         }
 
         for (Thread thread : threads) {
@@ -114,8 +104,6 @@ public class ThreadPool {
         }
 
         state = State.IDLE;
-
-        logDebug("Return");
     }
 
     /**
@@ -128,8 +116,6 @@ public class ThreadPool {
      * @throws IllegalStateException if this pool has not been started yet.
      */
     public void dispatch(Runnable runnable) {
-        logDebug("Enter");
-
         if (runnable == null)
             throw new NullPointerException();
 
@@ -137,62 +123,69 @@ public class ThreadPool {
             throw new IllegalStateException();
 
         offer(runnable);
-
-        logDebug("Return");
     }
 
-    // Private utility Method
+    // Private utility
 
-    private synchronized void offer(Runnable runnable) {
-        logDebug("Enter");
-
-        while (queueSize <= queue.size()) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    /**
+     * Offer the specified Runnable object to queue.
+     * method invocation will be blocked until the queue is full.
+     *
+     * @param runnable
+     */
+    private void offer(Runnable runnable) {
+        synchronized (mutexOfIsInterruptedAndQueue) {
+            while (queueSize <= queue.size()) {
+                try {
+                    mutexOfIsInterruptedAndQueue.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+            queue.offer(runnable);
+            mutexOfIsInterruptedAndQueue.notifyAll();
         }
-        queue.offer(runnable);
-        notifyAll();
-
-        logDebug("Return");
     }
 
-    private synchronized Runnable poll() {
-        logDebug("Enter");
-
-        while (queue.size() < 1) {
-            try {
-                if (isInterrupted)
+    /**
+     * Poll the Runnable object from queue.
+     * method invocation will be blocked until the queue is empty and is not interrupted.
+     * method return null object when stop method is invoked and queue is empty.
+     *
+     * @return Runnable object or null
+     */
+    private Runnable poll() {
+        synchronized (mutexOfIsInterruptedAndQueue) {
+            while (queue.size() < 1) {
+                if (isInterrupted) {
                     return null;
-                else
-                    wait();
-            } catch (InterruptedException e) {
-                return null;
+                }
+                try {
+                    mutexOfIsInterruptedAndQueue.wait();
+                } catch (InterruptedException e) {
+                    return null;
+                }
             }
+
+            Runnable runnable = queue.poll();
+            mutexOfIsInterruptedAndQueue.notifyAll();
+
+            return runnable;
         }
-
-        Runnable runnable = queue.poll();
-        notifyAll();
-
-        logDebug("Return");
-
-        return runnable;
     }
 
-    // Worker Thread Class
-
+    /**
+     * Simple Worker Thread class
+     */
     private class WorkerThread extends Thread {
         @Override
         public void run() {
             for (; ; ) {
                 Runnable runnable;
-                synchronized (ThreadPool.this) {
+                synchronized (mutexOfIsInterruptedAndQueue) {
                     runnable = poll();
-                    if (runnable == null && isInterrupted) {
-                        ThreadPool.this.notifyAll();
-                        logDebug("Return");
+                    if (runnable == null) {
+                        mutexOfIsInterruptedAndQueue.notifyAll();
                         return;
                     }
                 }
