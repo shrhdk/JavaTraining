@@ -141,8 +141,6 @@ public class ThreadPool {
         logDebug("Return");
     }
 
-    // Utility Method
-
     // Private utility Method
 
     private synchronized void offer(Runnable runnable) {
