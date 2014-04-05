@@ -60,11 +60,11 @@ public class ObjectForm extends Panel {
     private class generateButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            new ClassViewer(owner, new dialogListener(), class_);
+            new ClassViewer(owner, new DialogListener(), class_);
         }
     }
 
-    private class dialogListener implements ValueDialogListener {
+    private class DialogListener implements ValueDialogListener {
         @Override
         public void onDialogClose(Object returnValue) {
             generatedObject = returnValue;

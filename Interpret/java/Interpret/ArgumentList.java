@@ -1,38 +1,69 @@
 package Interpret;
 
-import java.awt.*;
+import com.sun.deploy.util.DialogListener;
+import com.sun.org.apache.xpath.internal.Arg;
 
-public class ArgumentList extends Panel {
+import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+public class ArgumentList extends JScrollPane {
 
     // Data
 
     private Dialog owner;
     private Class<?>[] types;
-    private ObjectForm[] objectForms;
+    private Object[] objects;
+
+    // Temp
+
+    int i, j;
 
     // API
 
     public ArgumentList(Dialog owner, Class<?>... types) {
         this.owner = owner;
         setTypes(types);
+
+        this.setViewportView(table);
+
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                i = table.getSelectedRow();
+                j = table.getSelectedColumn();
+                Class<?> type = ArgumentList.this.types[i];
+
+                if(j == 0) {
+                    return;
+                } else if(j == 1) {
+                    if(Utility.isPrimitive(type)) {
+                        new PrimitiveClassEditor(ArgumentList.this.owner, type.getCanonicalName(), valueDialogListener, type);
+                    } else {
+                        new ClassViewer(ArgumentList.this.owner, valueDialogListener, type);
+                    }
+                }
+            }
+        });
     }
 
     public void setTypes(Class<?>... types) {
-        this.types = types;
-        removeAll();
-        if (types == null || types.length == 0) {
-            setLayout(new GridLayout(1, 1));
-            add(new Label("No argument"));
+
+        if (types == null) {
+            this.types = new Class<?>[0];
+            this.objects = new Object[0];
         } else {
-            objectForms = new ObjectForm[types.length];
-            setLayout(new GridLayout(types.length + 1, 1));
-            add(new Label("Input arguments"));
-            for (int i = 0; i < types.length; i++) {
-                objectForms[i] = new ObjectForm(owner, types[i]);
-                add(objectForms[i]);
-            }
+            this.types = types;
+            this.objects = new Object[types.length];
         }
-        doLayout();
+
+        table.repaint();
     }
 
     public Object[] getValues() {
@@ -41,9 +72,59 @@ public class ArgumentList extends Panel {
         } else {
             Object[] returnValues = new Object[types.length];
             for (int i = 0; i < types.length; i++) {
-                returnValues[i] = objectForms[i].getValue();
+                returnValues[i] = objects[i];
             }
             return returnValues;
         }
     }
+
+    // GUI
+
+    TableModel model = new AbstractTableModel() {
+
+        private final String[] columnNames = new String[]{"Type", "Value"};
+
+        @Override
+        public int getRowCount() {
+            return types.length;
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 2;
+        }
+
+        @Override
+        public String getColumnName(int j) {
+            return columnNames[j];
+        }
+
+        @Override
+        public Object getValueAt(int i, int j) {
+            switch (j) {
+                case 0:
+                    return types[i].getCanonicalName();
+                case 1:
+                    return String.valueOf(objects[i]);
+                default:
+                    throw new IndexOutOfBoundsException();
+            }
+        }
+    };
+
+    JTable table = new JTable(model);
+
+    // Dialog is closed
+
+    private ValueDialogListener valueDialogListener = new ValueDialogListener() {
+        @Override
+        public void onDialogClose(Object return_) {
+            if(Utility.isPrimitive(types[i]) && return_ == null) {
+                return;
+            } else {
+                objects[i] = return_;
+                table.setModel(model);
+            }
+        }
+    };
 }

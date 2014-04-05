@@ -13,7 +13,8 @@ public abstract class ValueDialog extends Dialog {
 
     protected void return_(Object returnValue) {
         setVisible(false);
-        if (listener != null)
+        if (listener != null) {
             listener.onDialogClose(returnValue);
+        }
     }
 }
