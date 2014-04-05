@@ -1,13 +1,7 @@
 package Interpret;
 
-import com.sun.deploy.util.DialogListener;
-import com.sun.org.apache.xpath.internal.Arg;
-
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -31,7 +25,7 @@ public class ArgumentList extends JScrollPane {
         this.owner = owner;
         setTypes(types);
 
-        this.setViewportView(table);
+        setViewportView(table);
 
         table.addMouseListener(new MouseAdapter() {
             @Override
@@ -40,10 +34,10 @@ public class ArgumentList extends JScrollPane {
                 j = table.getSelectedColumn();
                 Class<?> type = ArgumentList.this.types[i];
 
-                if(j == 0) {
+                if (j == 0) {
                     return;
-                } else if(j == 1) {
-                    if(Utility.isPrimitive(type)) {
+                } else if (j == 1) {
+                    if (Utility.isPrimitive(type)) {
                         new PrimitiveClassEditor(ArgumentList.this.owner, type.getCanonicalName(), valueDialogListener, type);
                     } else {
                         new ClassViewer(ArgumentList.this.owner, valueDialogListener, type);
@@ -119,7 +113,7 @@ public class ArgumentList extends JScrollPane {
     private ValueDialogListener valueDialogListener = new ValueDialogListener() {
         @Override
         public void onDialogClose(Object return_) {
-            if(Utility.isPrimitive(types[i]) && return_ == null) {
+            if (Utility.isPrimitive(types[i]) && return_ == null) {
                 return;
             } else {
                 objects[i] = return_;

@@ -37,8 +37,8 @@ public class PrimitiveClassEditor extends ValueDialog {
 
         setLayout(new GridLayout(3, 1));
         add(field);
-        add(okButton);
         add(cancelButton);
+        add(okButton);
 
         setVisible(true);
     }
