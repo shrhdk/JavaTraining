@@ -1,0 +1,3 @@
+                       Initial  78MB /  81MB ( 1%)
+  After construct many objects  76MB /  81MB ( 1%)
+      After Garbage Collection  80MB /  81MB ( 1%)
