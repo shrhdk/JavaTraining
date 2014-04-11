@@ -113,7 +113,7 @@ public class ClassViewer extends ValueDialog {
                     Object object = construct(constructor, argumentList.getValues());
                     new ObjectViewer(ClassViewer.this, valueDialogListener, object);
                 } catch (Throwable e) {
-                    showMessage(ClassViewer.this, e.getMessage());
+                    showMessage(ClassViewer.this, e.toString());
                 }
             }
         }

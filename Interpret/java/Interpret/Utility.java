@@ -7,18 +7,26 @@ import java.lang.reflect.*;
 public class Utility {
 
     public static Object construct(Constructor constructor, Object... args) throws Throwable {
-        if (args == null) {
-            return constructor.newInstance();
-        } else {
-            return constructor.newInstance(args);
+        try {
+            if (args == null) {
+                return constructor.newInstance();
+            } else {
+                return constructor.newInstance(args);
+            }
+        } catch (InvocationTargetException e) {
+            throw e.getTargetException();
         }
     }
 
     public static Object invoke(Object object, Method method, Object... args) throws Throwable {
-        if (args == null) {
-            return method.invoke(object);
-        } else {
-            return method.invoke(object, args);
+        try {
+            if (args == null) {
+                return method.invoke(object);
+            } else {
+                return method.invoke(object, args);
+            }
+        } catch (InvocationTargetException e) {
+            throw e.getTargetException();
         }
     }
 

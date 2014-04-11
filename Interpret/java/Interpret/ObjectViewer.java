@@ -92,7 +92,7 @@ public class ObjectViewer extends ValueDialog {
                     Object returnValue = invoke(object, method, argumentList.getValues());
                     showMessage(ObjectViewer.this, returnValue.toString());
                 } catch (Throwable e) {
-                    showMessage(ObjectViewer.this, e.getMessage());
+                    showMessage(ObjectViewer.this, e.toString());
                 }
             }
         }
