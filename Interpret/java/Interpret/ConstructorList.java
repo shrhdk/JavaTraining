@@ -23,6 +23,7 @@ public class ConstructorList extends JList {
     public ConstructorList() {
         setModel(new ConstructorListModel());
         setCellRenderer(new ConstructorListCellRenderer());
+        addListSelectionListener(listSelectionListener);
     }
 
     public Class<?> getClass_() {
@@ -31,7 +32,12 @@ public class ConstructorList extends JList {
 
     public void setClass(Class<?> class_) {
         this.class_ = class_;
-        constructors = class_.getConstructors();
+        if (class_ == null) {
+            constructors = null;
+        } else {
+            constructors = class_.getConstructors();
+        }
+        updateUI();
     }
 
     public Constructor getSelectedConstructor() {
@@ -73,7 +79,11 @@ public class ConstructorList extends JList {
 
         @Override
         public int getSize() {
-            return constructors.length;
+            if (constructors == null) {
+                return 0;
+            } else {
+                return constructors.length;
+            }
         }
 
         @Override
@@ -87,7 +97,13 @@ public class ConstructorList extends JList {
 
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
-            return new Label(constructors[index].getName());
+            JLabel label = new JLabel(constructors[index].toString());
+
+            if (isSelected) {
+                label.setForeground(Color.blue);
+            }
+
+            return label;
         }
     }
 }

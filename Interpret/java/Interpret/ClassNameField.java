@@ -48,7 +48,7 @@ public class ClassNameField extends JTextField {
 
     private synchronized void onUpdate() {
         Class<?> currentClass = getClassObject();
-        if (currentClass == null || currentClass == lastClass) {
+        if (currentClass == lastClass) {
             return;
         }
 

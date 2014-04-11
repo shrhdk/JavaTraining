@@ -2,6 +2,7 @@ package interpret;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.Constructor;
 
 public class ClassViewer extends JFrame {
 
@@ -17,10 +18,10 @@ public class ClassViewer extends JFrame {
     // Constructor List and arguments
     private final JSplitPane mainSplit = new JSplitPane();
     private final JPanel constructorListPanel = new JPanel();
-    private final JList constructorList = new JList();
+    private final ConstructorList constructorList = new ConstructorList();
     private final JList argumentsTablePanel = new JList();
     private final JScrollPane argumentsTableScrollPane = new JScrollPane();
-    private final JTable argumentsTable = new JTable();
+    private final ArgumentsTable argumentsTable = new ArgumentsTable();
 
     // Buttons
     private final JPanel buttonGroup = new JPanel();
@@ -37,7 +38,14 @@ public class ClassViewer extends JFrame {
         classNameField.addClassChangedListener(new ClassNameField.ClassChangedListener() {
             @Override
             public void onChange(Class<?> class_) {
-                //constructorList.setClass(class_);
+                constructorList.setClass(class_);
+            }
+        });
+
+        constructorList.addConstructorChangedListener(new ConstructorList.ConstructorChangedListener() {
+            @Override
+            public void onChange(Constructor constructor) {
+                argumentsTable.setClass(constructor.getParameterTypes());
             }
         });
     }
