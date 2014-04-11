@@ -46,7 +46,7 @@ public class ClassNameField extends JTextField {
 
     // Listener
 
-    private void onUpdate() {
+    private synchronized void onUpdate() {
         Class<?> currentClass = getClassObject();
         if (currentClass == null || currentClass == lastClass) {
             return;
@@ -72,7 +72,6 @@ public class ClassNameField extends JTextField {
 
         @Override
         public void changedUpdate(DocumentEvent documentEvent) {
-            onUpdate();
         }
     };
 }

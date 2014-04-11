@@ -10,7 +10,7 @@ public class ClassViewer extends JFrame {
     // Class name and array length
     private final JPanel topGroup = new JPanel();
     private final JPanel classNameGroup = new JPanel();
-    private final JTextField classNameField = new JTextField();
+    private final ClassNameField classNameField = new ClassNameField();
     private final JPanel arrayGroup = new JPanel();
     private final JTextField arrayLengthField = new JTextField();
 
@@ -30,16 +30,17 @@ public class ClassViewer extends JFrame {
 
     public ClassViewer() {
         setUpLayout();
+        setUpListener();
     }
 
-//    private void setUpListener() {
-//        classNameField.addClassChangedListener(new ClassNameField.ClassChangedListener() {
-//            @Override
-//            public void onChange(Class<?> class_) {
-//                constructorList.setClass(class_);
-//            }
-//        });
-//    }
+    private void setUpListener() {
+        classNameField.addClassChangedListener(new ClassNameField.ClassChangedListener() {
+            @Override
+            public void onChange(Class<?> class_) {
+                //constructorList.setClass(class_);
+            }
+        });
+    }
 
     private void setUpLayout() {
         // Setup Frame
