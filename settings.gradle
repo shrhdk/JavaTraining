@@ -58,7 +58,8 @@ def getGuiProjects() {
 	return guiProjects
 }
 
+def playGround = [':Playground']
 def jplProjects = getJplProjects()
 def guiProjects = getGuiProjects()
-def interpretProjects = ':Interpret'
-include ((jplProjects + guiProjects + interpretProjects) as String[])
+def interpretProjects = [':Interpret']
+include ((playGround + jplProjects + guiProjects + interpretProjects) as String[])
