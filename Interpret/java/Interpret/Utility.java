@@ -1,4 +1,4 @@
-package Interpret;
+package interpret;
 
 import javax.swing.*;
 import java.awt.*;

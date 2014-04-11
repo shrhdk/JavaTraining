@@ -1,7 +1,8 @@
-package Interpret;
+package interpret;
 
 public class Interpret {
     public static void main(String[] args) {
-        new ClassViewer(null, null, null);
+        interpret.ClassViewer classViewer = new interpret.ClassViewer();
+        classViewer.setVisible(true);
     }
 }

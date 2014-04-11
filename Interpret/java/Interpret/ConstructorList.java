@@ -1,47 +1,37 @@
-package Interpret;
+package interpret;
 
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
+import java.util.HashSet;
+import java.util.Set;
 
-public class ConstructorList extends List {
+public class ConstructorList extends JList {
 
     // Data
 
-    private final Dialog owner;
-    private final Listener listener;
+    private Class<?> class_;
     private Constructor[] constructors;
-
-    private int lastIndex = -1;
+    private final Set<ConstructorChangedListener> listeners = new HashSet<ConstructorChangedListener>();
 
     // API
 
-    public ConstructorList(Dialog owner, Listener listener, Constructor... constructors) {
-        if (owner == null)
-            throw new IllegalArgumentException();
-
-        setMultipleMode(false);
-        addItemListener(itemListener);
-
-        this.owner = owner;
-        this.listener = listener;
-
-        setConstructors(constructors);
+    public ConstructorList() {
+        setModel(new ConstructorListModel());
+        setCellRenderer(new ConstructorListCellRenderer());
     }
 
-    public void setConstructors(Constructor... constructors) {
-        this.constructors = constructors;
+    public Class<?> getClass_() {
+        return class_;
+    }
 
-        if (constructors == null || constructors.length == 0) {
-            removeAll();
-            add("No Constructor");
-        } else {
-            removeAll();
-            for (Constructor constructor : constructors) {
-                add(constructor.toString());
-            }
-        }
+    public void setClass(Class<?> class_) {
+        this.class_ = class_;
+        constructors = class_.getConstructors();
     }
 
     public Constructor getSelectedConstructor() {
@@ -53,23 +43,51 @@ public class ConstructorList extends List {
         }
     }
 
+    public boolean addConstructorChangedListener(ConstructorChangedListener listener) {
+        return listeners.add(listener);
+    }
+
+    public boolean removeConstructorChangedListener(ConstructorChangedListener listener) {
+        return listeners.remove(listener);
+    }
+
     // Interface
 
-    public interface Listener {
+    public interface ConstructorChangedListener {
         void onChange(Constructor constructor);
     }
 
     // Listener
 
-    private ItemListener itemListener = new ItemListener() {
+    private ListSelectionListener listSelectionListener = new ListSelectionListener() {
         @Override
-        public void itemStateChanged(ItemEvent itemEvent) {
-            int currentIndex = getSelectedIndex();
-            if (currentIndex != lastIndex) {
-                lastIndex = currentIndex;
-                if (listener != null)
-                    listener.onChange(constructors[currentIndex]);
+        public void valueChanged(ListSelectionEvent listSelectionEvent) {
+            for (ConstructorChangedListener listener : listeners) {
+                listener.onChange(constructors[getSelectedIndex()]);
             }
         }
     };
+
+    // ListModel
+    private class ConstructorListModel extends AbstractListModel {
+
+        @Override
+        public int getSize() {
+            return constructors.length;
+        }
+
+        @Override
+        public Object getElementAt(int i) {
+            return constructors[i];
+        }
+    }
+
+    // ListCellRenderer
+    private class ConstructorListCellRenderer implements ListCellRenderer {
+
+        @Override
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
+            return new Label(constructors[index].getName());
+        }
+    }
 }

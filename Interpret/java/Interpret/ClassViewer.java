@@ -1,135 +1,95 @@
-package Interpret;
+package interpret;
 
-import sun.security.util.Length;
-
-import java.awt.event.*;
-import java.lang.reflect.*;
-
-import static Interpret.Utility.*;
-
+import javax.swing.*;
 import java.awt.*;
 
-public class ClassViewer extends ValueDialog {
+public class ClassViewer extends JFrame {
 
-    // Data
+    // GUI Component
 
-    private Class<?> class_;
+    // Class name and array length
+    private final JPanel topGroup = new JPanel();
+    private final JPanel classNameGroup = new JPanel();
+    private final JTextField classNameField = new JTextField();
+    private final JPanel arrayGroup = new JPanel();
+    private final JTextField arrayLengthField = new JTextField();
 
-    // API
+    // Constructor List and arguments
+    private final JSplitPane mainSplit = new JSplitPane();
+    private final JPanel constructorListPanel = new JPanel();
+    private final JList constructorList = new JList();
+    private final JList argumentsTablePanel = new JList();
+    private final JScrollPane argumentsTableScrollPane = new JScrollPane();
+    private final JTable argumentsTable = new JTable();
 
-    public ClassViewer(Dialog owner, ValueDialogListener listener) {
-        this(owner, listener, null);
+    // Buttons
+    private final JPanel buttonGroup = new JPanel();
+    private final JButton cancelButton = new JButton("Cancel");
+    private final JButton constructArrayButton = new JButton("Construct Array");
+    private final JButton constructButton = new JButton("Construct Object");
+
+    public ClassViewer() {
+        setUpLayout();
     }
 
-    public ClassViewer(Dialog owner, ValueDialogListener listener, Class<?> class_) {
-        super(owner, "Class Viewer", listener);
+//    private void setUpListener() {
+//        classNameField.addClassChangedListener(new ClassNameField.ClassChangedListener() {
+//            @Override
+//            public void onChange(Class<?> class_) {
+//                constructorList.setClass(class_);
+//            }
+//        });
+//    }
 
-        this.class_ = class_;
+    private void setUpLayout() {
+        // Setup Frame
+        setTitle("ClassViewer");
+        setSize(800, 600);
 
-        setUpComponent();
+        // Setup whole layout
+        setLayout(new BorderLayout());
+        getContentPane().add(BorderLayout.NORTH, topGroup);
+        getContentPane().add(BorderLayout.CENTER, mainSplit);
+        getContentPane().add(BorderLayout.SOUTH, buttonGroup);
 
-        setVisible(true);
+        // Setup North area layout
+        topGroup.setLayout(new BorderLayout());
+        topGroup.add(BorderLayout.CENTER, classNameGroup);
+        topGroup.add(BorderLayout.EAST, arrayGroup);
+
+        // Setup Class Name area layout
+        classNameGroup.setBorder(BorderFactory.createTitledBorder("Class Name"));
+        classNameGroup.setLayout(new GridLayout(1, 1));
+        classNameGroup.add(classNameField);
+
+        // Setup Array Length area layout
+        arrayGroup.setBorder(BorderFactory.createTitledBorder("Array Length"));
+        arrayGroup.setLayout(new GridLayout(1, 1));
+        arrayGroup.add(arrayLengthField);
+        arrayLengthField.setColumns(10);
+
+        // Setup Center area layout
+        mainSplit.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+        mainSplit.setDividerLocation(400);
+        mainSplit.setTopComponent(constructorListPanel);
+        mainSplit.setBottomComponent(argumentsTablePanel);
+
+        // Setup Constructor List layout
+        constructorListPanel.setBorder(BorderFactory.createTitledBorder("Constructors"));
+        constructorListPanel.setLayout(new BorderLayout());
+        constructorListPanel.add(BorderLayout.CENTER, constructorList);
+
+        // Setup Argument Table Layout
+        argumentsTablePanel.setBorder(BorderFactory.createTitledBorder("Arguments"));
+        argumentsTablePanel.setLayout(new BorderLayout());
+        argumentsTablePanel.add(BorderLayout.CENTER, argumentsTableScrollPane);
+        argumentsTableScrollPane.setViewportView(argumentsTable);
+
+        // Setup Button area layout
+        buttonGroup.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        buttonGroup.add(cancelButton);
+        buttonGroup.add(constructArrayButton);
+        buttonGroup.add(constructButton);
     }
 
-    // GUI
-
-    private ClassNameField classNameField;
-    private Checkbox isArrayCheckBox;
-    private TextField arrayLengthField;
-    private ConstructorList constructorList;
-    private ArgumentList argumentList;
-    private Button constructButton;
-    private Button cancelButton;
-
-    private void setUpComponent() {
-        setSize(640, 480);
-
-        setLayout(new GridLayout(7, 1));
-
-        classNameField = new ClassNameField();
-        classNameField.setClassNameFieldListener(classNameFieldListener);
-
-        isArrayCheckBox = new Checkbox("Array");
-        arrayLengthField = new TextField("type array length");
-
-        constructorList = new ConstructorList(this, constructListListener, null);
-
-        argumentList = new ArgumentList(this, null);
-
-        constructButton = new Button("Construct Object");
-        constructButton.addActionListener(constructButtonListener);
-
-        cancelButton = new Button("Cancel");
-        cancelButton.addActionListener(cancelButtonListener);
-
-        add(classNameField);
-        add(isArrayCheckBox);
-        add(arrayLengthField);
-        add(constructorList);
-        add(argumentList);
-        add(constructButton);
-        add(cancelButton);
-
-        if (class_ != null) {
-            classNameField.setText(class_.getCanonicalName());
-            classNameFieldListener.onChange(class_);
-            if(class_.isArray()) {
-                isArrayCheckBox.setState(true);
-            }
-        }
-    }
-
-    // Listener
-
-    private ClassNameField.Listener classNameFieldListener = new ClassNameField.Listener() {
-        @Override
-        public void onChange(Class<?> class_) {
-            ClassViewer.this.class_ = class_;
-            constructorList.setConstructors(class_.getConstructors());
-        }
-    };
-
-    private ConstructorList.Listener constructListListener = new ConstructorList.Listener() {
-        @Override
-        public void onChange(Constructor constructor) {
-            if (constructor != null)
-                argumentList.setTypes(constructor.getParameterTypes());
-        }
-    };
-
-    private ActionListener constructButtonListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            Constructor constructor = constructorList.getSelectedConstructor();
-            if (class_ != null && isArrayCheckBox.getState()) {
-                try {
-                    int length = Integer.parseInt(arrayLengthField.getText());
-                    new ArrayViewer(ClassViewer.this, valueDialogListener, class_, length);
-                } catch (NumberFormatException e) {
-                    Utility.showMessage(ClassViewer.this, "Invalid array length.");
-                }
-            } else if (constructor != null) {
-                try {
-                    Object object = construct(constructor, argumentList.getValues());
-                    new ObjectViewer(ClassViewer.this, valueDialogListener, object);
-                } catch (Throwable e) {
-                    showMessage(ClassViewer.this, e.toString());
-                }
-            }
-        }
-    };
-
-    private ActionListener cancelButtonListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            return_(null);
-        }
-    };
-
-    private ValueDialogListener valueDialogListener = new ValueDialogListener() {
-        @Override
-        public void onDialogClose(Object returnValue) {
-            return_(returnValue);
-        }
-    };
 }
