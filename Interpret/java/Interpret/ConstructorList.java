@@ -31,9 +31,8 @@ public class ConstructorList extends JList {
     }
 
     public void setClass(Class<?> class_) {
-        this.class_ = class_;
         if (class_ == null) {
-            constructors = null;
+            constructors = new Constructor[0];
         } else {
             constructors = class_.getConstructors();
         }
@@ -69,7 +68,8 @@ public class ConstructorList extends JList {
         @Override
         public void valueChanged(ListSelectionEvent listSelectionEvent) {
             for (ConstructorChangedListener listener : listeners) {
-                listener.onChange(constructors[getSelectedIndex()]);
+                int i = getSelectedIndex();
+                listener.onChange(i == -1 ? null : constructors[i]);
             }
         }
     };
@@ -79,11 +79,11 @@ public class ConstructorList extends JList {
 
         @Override
         public int getSize() {
-            if (constructors == null) {
-                return 0;
-            } else {
-                return constructors.length;
+            if (constructors.length == 0) {
+                clearSelection();
             }
+
+            return constructors.length;
         }
 
         @Override

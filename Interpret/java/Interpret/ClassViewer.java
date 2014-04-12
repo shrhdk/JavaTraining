@@ -30,25 +30,46 @@ public class ClassViewer extends JFrame {
     private final JButton constructButton = new JButton("Construct Object");
 
     public ClassViewer() {
+        this(null);
+    }
+
+    public ClassViewer(Class<?> class_) {
         setUpLayout();
         setUpListener();
+
+        if (class_ != null) {
+            classNameField.setText(class_.getCanonicalName());
+            classChangedListener.onChange(class_);
+        }
     }
 
-    private void setUpListener() {
-        classNameField.addClassChangedListener(new ClassNameField.ClassChangedListener() {
-            @Override
-            public void onChange(Class<?> class_) {
-                constructorList.setClass(class_);
-            }
-        });
+    // Setup component event listener
 
-        constructorList.addConstructorChangedListener(new ConstructorList.ConstructorChangedListener() {
-            @Override
-            public void onChange(Constructor constructor) {
+    private final ClassNameField.ClassChangedListener classChangedListener = new ClassNameField.ClassChangedListener() {
+        @Override
+        public void onChange(Class<?> class_) {
+            constructorList.setClass(class_);
+            arrayLengthField.setEnabled(class_ != null);
+        }
+    };
+
+    private final ConstructorList.ConstructorChangedListener constructorChangedListener = new ConstructorList.ConstructorChangedListener() {
+        @Override
+        public void onChange(Constructor constructor) {
+            if (constructor == null) {
+                argumentsTable.setClass(null);
+            } else {
                 argumentsTable.setClass(constructor.getParameterTypes());
             }
-        });
+        }
+    };
+
+    private void setUpListener() {
+        classNameField.addClassChangedListener(classChangedListener);
+        constructorList.addConstructorChangedListener(constructorChangedListener);
     }
+
+    // Setup layout
 
     private void setUpLayout() {
         // Setup Frame
