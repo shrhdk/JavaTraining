@@ -100,7 +100,9 @@ public class ConstructorList extends JList {
             JLabel label = new JLabel(constructors[index].toString());
 
             if (isSelected) {
-                label.setForeground(Color.blue);
+                label.setForeground(Color.white);
+                label.setBackground(Color.blue);
+                label.setOpaque(true);
             }
 
             return label;

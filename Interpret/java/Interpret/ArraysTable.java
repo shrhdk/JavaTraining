@@ -7,35 +7,34 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class ArgumentsTable extends JTable implements Parent {
+public class ArraysTable extends JTable implements Parent {
 
     // Constants
 
-    private final String[] columnNames = new String[]{"Type", "Value"};
+    private static final String[] COLUMN_NAMES = new String[]{"Index", "Value"};
 
     // Data
 
-    private JFrame parentFrame;
-    private Class<?>[] classes = new Class<?>[0];
-    private Object[] objects = new Object[0];
+    private Object[] array;
 
     // Temp
 
-    int index;
+    private JFrame parentFrame;
+    private int index;
 
     // API
 
-    public ArgumentsTable() {
-        setModel(new ArgumentsTableModel());
-        getColumn(columnNames[0]).setCellRenderer(new ClassColumnRenderer());
-        getColumn(columnNames[1]).setCellRenderer(new ObjectColumnRenderer());
+    public ArraysTable() {
+        setModel(new ArraysTableModel());
+        getColumn(COLUMN_NAMES[0]).setCellRenderer(new IndexColumnRenderer());
+        getColumn(COLUMN_NAMES[1]).setCellRenderer(new ObjectColumnRenderer());
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 int column = getSelectedColumn();
                 index = getSelectedRow();
-                Class<?> class_ = ArgumentsTable.this.classes[index];
+                Class<?> class_ = array.getClass().getComponentType();
 
                 // Launch Class Viewer
                 if (column == 1 && !Utility.isPrimitive(class_)) {
@@ -46,7 +45,7 @@ public class ArgumentsTable extends JTable implements Parent {
                         parentFrame.setEnabled(false);
                     }
 
-                    ClassViewer classViewer = new ClassViewer(class_, ArgumentsTable.this);
+                    ClassViewer classViewer = new ClassViewer(class_, ArraysTable.this);
                     classViewer.setVisible(true);
                 }
             }
@@ -58,42 +57,32 @@ public class ArgumentsTable extends JTable implements Parent {
         if (parentFrame != null) {
             parentFrame.setEnabled(true);
         }
-        objects[index] = value;
+        array[index] = value;
     }
 
-    public void setClass(Class<?>... classes) {
-        if (classes == null) {
-            this.classes = new Class<?>[0];
-            objects = new Object[0];
-        } else {
-            this.classes = classes;
-            objects = new Object[classes.length];
-        }
+    public void setArray(Object[] array) {
+        this.array = array;
 
         updateUI();
     }
 
-    public Object[] getValues() {
-        return objects;
-    }
-
     // Table Model
 
-    private class ArgumentsTableModel extends AbstractTableModel {
+    private class ArraysTableModel extends AbstractTableModel {
 
         @Override
         public int getRowCount() {
-            return classes.length;
+            return array.length;
         }
 
         @Override
         public int getColumnCount() {
-            return columnNames.length;
+            return COLUMN_NAMES.length;
         }
 
         @Override
         public String getColumnName(int i) {
-            return columnNames[i];
+            return COLUMN_NAMES[i];
         }
 
         @Override
@@ -102,7 +91,7 @@ public class ArgumentsTable extends JTable implements Parent {
                 case 0:
                     return false;
                 case 1:
-                    return Utility.isPrimitive(classes[i]);
+                    return Utility.isPrimitive(array.getClass().getComponentType());
                 default:
                     throw new AssertionError("");
             }
@@ -114,11 +103,11 @@ public class ArgumentsTable extends JTable implements Parent {
                 case 0:
                     break;
                 case 1:
-                    if (Utility.isPrimitive(classes[i])) {
+                    if (Utility.isPrimitive(array.getClass().getComponentType())) {
                         try {
-                            objects[i] = Utility.toObject(classes[i], (String) value);
-                        } catch (Exception e) {
-                            Utility.showMessage(ArgumentsTable.this, e.toString());
+                            array[i] = Utility.toObject(array.getClass().getComponentType(), (String) value);
+                        } catch (Throwable e) {
+                            Utility.showMessage(ArraysTable.this, e.toString());
                         }
                     }
                     break;
@@ -131,28 +120,28 @@ public class ArgumentsTable extends JTable implements Parent {
         public Object getValueAt(int i, int j) {
             switch (j) {
                 case 0:
-                    return classes[i];
+                    return i;
                 case 1:
-                    return objects[i];
+                    return array[i];
                 default:
                     throw new AssertionError("");
             }
         }
     }
 
-    // Cell Renderer
+    // Table Cell Renderer
 
-    private class ClassColumnRenderer implements TableCellRenderer {
+    private class IndexColumnRenderer implements TableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int i, int j) {
-            return new JLabel(((Class<?>) value).getCanonicalName());
+            return new JLabel(String.valueOf(value));
         }
     }
 
     private class ObjectColumnRenderer implements TableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int i, int j) {
-            if (Utility.isPrimitive(classes[i])) {
+            if (Utility.isPrimitive(array.getClass().getComponentType())) {
                 if (value == null) {
                     return new JLabel("");
                 } else {
