@@ -15,7 +15,7 @@ public class ConstructorList extends JList {
     // Data
 
     private Class<?> class_;
-    private Constructor[] constructors;
+    private Constructor[] constructors = new Constructor[0];
     private final Set<ConstructorChangedListener> listeners = new HashSet<ConstructorChangedListener>();
 
     // API
