@@ -5,7 +5,6 @@ task deployJar(type: Copy, dependsOn: jar)  {
 
 jar {
 	manifest {
-		attributes 'Main-Class': 'Interpret.Interpret'
+		attributes 'Main-Class': 'interpret.Interpret'
 	}
-	from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
 }
