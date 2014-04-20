@@ -3,13 +3,10 @@ package interpret;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.*;
-import java.awt.event.TextEvent;
-import java.awt.event.TextListener;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ClassNameField extends JTextField {
+public class JClassNameField extends JTextField {
 
     // Data
 
@@ -18,8 +15,22 @@ public class ClassNameField extends JTextField {
 
     // API
 
-    public ClassNameField() {
-        getDocument().addDocumentListener(documentListener);
+    public JClassNameField() {
+        getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent documentEvent) {
+                onUpdate();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent documentEvent) {
+                onUpdate();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent documentEvent) {
+            }
+        });
     }
 
     public Class<?> getClassObject() {
@@ -59,19 +70,4 @@ public class ClassNameField extends JTextField {
         }
     }
 
-    private DocumentListener documentListener = new DocumentListener() {
-        @Override
-        public void insertUpdate(DocumentEvent documentEvent) {
-            onUpdate();
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent documentEvent) {
-            onUpdate();
-        }
-
-        @Override
-        public void changedUpdate(DocumentEvent documentEvent) {
-        }
-    };
 }

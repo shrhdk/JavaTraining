@@ -4,30 +4,32 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ConstructorList extends JList {
+public class JConstructorList extends JList {
 
     // Data
 
-    private Class<?> class_;
     private Constructor[] constructors = new Constructor[0];
     private final Set<ConstructorChangedListener> listeners = new HashSet<ConstructorChangedListener>();
 
     // API
 
-    public ConstructorList() {
+    public JConstructorList() {
         setModel(new ConstructorListModel());
         setCellRenderer(new ConstructorListCellRenderer());
-        addListSelectionListener(listSelectionListener);
-    }
 
-    public Class<?> getClass_() {
-        return class_;
+        addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent listSelectionEvent) {
+                for (ConstructorChangedListener listener : listeners) {
+                    int i = getSelectedIndex();
+                    listener.onChange(i == -1 ? null : constructors[i]);
+                }
+            }
+        });
     }
 
     public void setClass(Class<?> class_) {
@@ -63,16 +65,6 @@ public class ConstructorList extends JList {
     }
 
     // Listener
-
-    private ListSelectionListener listSelectionListener = new ListSelectionListener() {
-        @Override
-        public void valueChanged(ListSelectionEvent listSelectionEvent) {
-            for (ConstructorChangedListener listener : listeners) {
-                int i = getSelectedIndex();
-                listener.onChange(i == -1 ? null : constructors[i]);
-            }
-        }
-    };
 
     // ListModel
     private class ConstructorListModel extends AbstractListModel {

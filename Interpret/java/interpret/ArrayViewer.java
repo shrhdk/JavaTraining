@@ -15,8 +15,8 @@ public class ArrayViewer extends SubFrame{
 
     // API
 
-    public ArrayViewer(Parent parent, Object[] array) {
-        super(parent);
+    public ArrayViewer(Object[] array, DialogListener dialogListener) {
+        super(dialogListener);
         this.array = array;
         arraysTable.setArray(array);
         setupLayout();
@@ -26,20 +26,28 @@ public class ArrayViewer extends SubFrame{
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
-                return_(null);
+                return_();
             }
         });
     }
 
     // GUI Component
     private final JScrollPane arraysTableScrollPane = new JScrollPane();
-    private final ArraysTable arraysTable = new ArraysTable();
+    private final JArraysTable arraysTable = new JArraysTable();
 
     private final JPanel buttonPanel = new JPanel();
+    private final JButton cancelButton = new JButton("Cancel");
     private final JButton returnNullButton = new JButton("Return null");
     private final JButton returnArrayButton = new JButton("Return array");
 
     // Setup component event listener
+
+    private final ActionListener cancelButtonListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            return_();
+        }
+    };
 
     private final ActionListener returnNullButtonListener = new ActionListener() {
         @Override
@@ -56,6 +64,7 @@ public class ArrayViewer extends SubFrame{
     };
 
     private void setupListener() {
+        cancelButton.addActionListener(cancelButtonListener);
         returnNullButton.addActionListener(returnNullButtonListener);
         returnArrayButton.addActionListener(returnArrayButtonListener);
     }
@@ -78,6 +87,7 @@ public class ArrayViewer extends SubFrame{
 
         // Setup Button Panel
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(cancelButton);
         buttonPanel.add(returnNullButton);
         buttonPanel.add(returnArrayButton);
 

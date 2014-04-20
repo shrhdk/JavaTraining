@@ -9,9 +9,10 @@ import java.awt.event.WindowEvent;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 
-import static interpret.Utility.*;
+import static interpret.Utility.construct;
+import static interpret.Utility.showMessage;
 
-public class ClassViewer extends SubFrame implements Parent {
+public class ClassViewer extends SubFrame implements DialogListener {
 
     private final boolean isRootFrame;
 
@@ -19,18 +20,31 @@ public class ClassViewer extends SubFrame implements Parent {
         this(null, null);
     }
 
-    public ClassViewer(Class<?> class_, Parent parent) {
-        super(parent);
+    public ClassViewer(Class<?> type, DialogListener dialogListener) {
+        super(dialogListener);
 
-        isRootFrame = (parent == null);
+        if (type != null && type.isEnum()) {
+            throw new IllegalArgumentException("type must not be enum type");
+        }
+
+        isRootFrame = (dialogListener == null);
+        cancelButton.setVisible(!isRootFrame);
         returnNullButton.setVisible(!isRootFrame);
 
         setupLayout();
         setupListener();
 
-        if (class_ != null) {
-            classNameField.setText(class_.getCanonicalName());
-            classChangedListener.onChange(class_);
+        if (type != null) {
+            if (type.isArray()) {
+                type = type.getComponentType();
+                constructButton.setVisible(false);
+            } else {
+                arrayPanel.setVisible(false);
+                constructArrayButton.setVisible(false);
+            }
+
+            classNameField.setText(type.getCanonicalName());
+            classChangedListener.onChange(type);
         }
 
         // X button is clicked
@@ -40,14 +54,14 @@ public class ClassViewer extends SubFrame implements Parent {
                 if (isRootFrame) {
                     System.exit(0);
                 } else {
-                    return_(null);
+                    return_();
                 }
             }
         });
     }
 
     @Override
-    public void onSubFrameClose(Object value) {
+    public void onSubFrameReturn(Object value) {
         if (isRootFrame) {
             setVisible(true);
         } else {
@@ -55,33 +69,43 @@ public class ClassViewer extends SubFrame implements Parent {
         }
     }
 
+    @Override
+    public void onSubFrameCancel() {
+        if (isRootFrame) {
+            setVisible(true);
+        } else {
+            return_();
+        }
+    }
+
     // GUI Component
 
     // Class name and array length
     private final JPanel topGroup = new JPanel();
-    private final JPanel classNameGroup = new JPanel();
-    private final ClassNameField classNameField = new ClassNameField();
-    private final JPanel arrayGroup = new JPanel();
+    private final JPanel classNamePanel = new JPanel();
+    private final JClassNameField classNameField = new JClassNameField();
+    private final JPanel arrayPanel = new JPanel();
     private final JSpinner arrayLengthSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
 
     // Constructor List and arguments
     private final JSplitPane mainSplit = new JSplitPane();
     private final JScrollPane constructorListScrollPane = new JScrollPane();
     private final JPanel constructorListPanel = new JPanel();
-    private final ConstructorList constructorList = new ConstructorList();
+    private final JConstructorList constructorList = new JConstructorList();
     private final JPanel argumentsTablePanel = new JPanel();
     private final JScrollPane argumentsTableScrollPane = new JScrollPane();
-    private final ArgumentsTable argumentsTable = new ArgumentsTable();
+    private final JArgumentsTable argumentsTable = new JArgumentsTable();
 
     // Buttons
-    private final JPanel buttonGroup = new JPanel();
+    private final JPanel buttonPanel = new JPanel();
+    private final JButton cancelButton = new JButton("Cancel");
     private final JButton returnNullButton = new JButton("Return null");
     private final JButton constructArrayButton = new JButton("Construct Array");
     private final JButton constructButton = new JButton("Construct Object");
 
     // Setup component event listener
 
-    private final ClassNameField.ClassChangedListener classChangedListener = new ClassNameField.ClassChangedListener() {
+    private final JClassNameField.ClassChangedListener classChangedListener = new JClassNameField.ClassChangedListener() {
         @Override
         public void onChange(Class<?> class_) {
             constructorList.setClass(class_);
@@ -90,11 +114,18 @@ public class ClassViewer extends SubFrame implements Parent {
         }
     };
 
-    private final ConstructorList.ConstructorChangedListener constructorChangedListener = new ConstructorList.ConstructorChangedListener() {
+    private final JConstructorList.ConstructorChangedListener constructorChangedListener = new JConstructorList.ConstructorChangedListener() {
         @Override
         public void onChange(Constructor constructor) {
             argumentsTable.setClass(constructor == null ? null : constructor.getParameterTypes());
             constructButton.setEnabled(constructor != null);
+        }
+    };
+
+    private final ActionListener cancelButtonListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            return_();
         }
     };
 
@@ -111,8 +142,8 @@ public class ClassViewer extends SubFrame implements Parent {
             try {
                 Class<?> class_ = classNameField.getClassObject();
                 int length = Integer.parseInt(arrayLengthSpinner.getValue().toString());
-                Object[] array = (Object[])Array.newInstance(class_, length);
-                ArrayViewer arrayViewer = new ArrayViewer(ClassViewer.this, array);
+                Object[] array = (Object[]) Array.newInstance(class_, length);
+                ArrayViewer arrayViewer = new ArrayViewer(array, ClassViewer.this);
                 setVisible(false);
                 arrayViewer.setVisible(true);
             } catch (NumberFormatException e) {
@@ -125,8 +156,10 @@ public class ClassViewer extends SubFrame implements Parent {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             try {
-                Object object = construct(constructorList.getSelectedConstructor(), argumentsTable.getValues());
-                ObjectViewer objectViewer = new ObjectViewer(ClassViewer.this, object);
+                Constructor constructor = constructorList.getSelectedConstructor();
+                Object[] arguments = argumentsTable.getValues();
+                Object object = construct(constructor, arguments);
+                ObjectViewer objectViewer = new ObjectViewer(object, ClassViewer.this);
                 setVisible(false);
                 objectViewer.setVisible(true);
             } catch (Throwable e) {
@@ -138,6 +171,7 @@ public class ClassViewer extends SubFrame implements Parent {
     private void setupListener() {
         classNameField.addClassChangedListener(classChangedListener);
         constructorList.addConstructorChangedListener(constructorChangedListener);
+        cancelButton.addActionListener(cancelButtonListener);
         returnNullButton.addActionListener(returnNullButtonListener);
         constructArrayButton.addActionListener(constructArrayButtonListener);
         constructButton.addActionListener(constructButtonListener);
@@ -154,22 +188,22 @@ public class ClassViewer extends SubFrame implements Parent {
         setLayout(new BorderLayout());
         getContentPane().add(BorderLayout.NORTH, topGroup);
         getContentPane().add(BorderLayout.CENTER, mainSplit);
-        getContentPane().add(BorderLayout.SOUTH, buttonGroup);
+        getContentPane().add(BorderLayout.SOUTH, buttonPanel);
 
         // Setup North area layout
         topGroup.setLayout(new BorderLayout());
-        topGroup.add(BorderLayout.CENTER, classNameGroup);
-        topGroup.add(BorderLayout.EAST, arrayGroup);
+        topGroup.add(BorderLayout.CENTER, classNamePanel);
+        topGroup.add(BorderLayout.EAST, arrayPanel);
 
         // Setup Class Name area layout
-        classNameGroup.setBorder(BorderFactory.createTitledBorder("Class Name"));
-        classNameGroup.setLayout(new GridLayout(1, 1));
-        classNameGroup.add(classNameField);
+        classNamePanel.setBorder(BorderFactory.createTitledBorder("Class Name"));
+        classNamePanel.setLayout(new GridLayout(1, 1));
+        classNamePanel.add(classNameField);
 
         // Setup Array Length area layout
-        arrayGroup.setBorder(BorderFactory.createTitledBorder("Array Length"));
-        arrayGroup.setLayout(new GridLayout(1, 1));
-        arrayGroup.add(arrayLengthSpinner);
+        arrayPanel.setBorder(BorderFactory.createTitledBorder("Array Length"));
+        arrayPanel.setLayout(new GridLayout(1, 1));
+        arrayPanel.add(arrayLengthSpinner);
 
         // Setup Center area layout
         mainSplit.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
@@ -190,10 +224,11 @@ public class ClassViewer extends SubFrame implements Parent {
         argumentsTableScrollPane.setViewportView(argumentsTable);
 
         // Setup Button area layout
-        buttonGroup.setLayout(new FlowLayout(FlowLayout.RIGHT));
-        buttonGroup.add(returnNullButton);
-        buttonGroup.add(constructArrayButton);
-        buttonGroup.add(constructButton);
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(returnNullButton);
+        buttonPanel.add(constructArrayButton);
+        buttonPanel.add(constructButton);
 
         // Locate JFrame to center of screen
         setLocationRelativeTo(null);    // Should be called after setup layout

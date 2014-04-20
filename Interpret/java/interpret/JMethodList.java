@@ -5,10 +5,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class MethodList extends JList {
+public class JMethodList extends JList {
     // Data
 
     private Class<?> class_;
@@ -18,10 +20,19 @@ public class MethodList extends JList {
 
     // API
 
-    public MethodList() {
+    public JMethodList() {
         setModel(new MethodListModel());
         setCellRenderer(new MethodListCellRenderer());
-        addListSelectionListener(listSelectionListener);
+
+        addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent listSelectionEvent) {
+                for (MethodChangedListener listener : listeners) {
+                    int i = getSelectedIndex();
+                    listener.onChange(i == -1 ? null : filteredMethods[i]);
+                }
+            }
+        });
     }
 
     public Class<?> getClass_() {
@@ -83,16 +94,6 @@ public class MethodList extends JList {
 
     // Listener
 
-    private ListSelectionListener listSelectionListener = new ListSelectionListener() {
-        @Override
-        public void valueChanged(ListSelectionEvent listSelectionEvent) {
-            for (MethodChangedListener listener : listeners) {
-                int i = getSelectedIndex();
-                listener.onChange(i == -1 ? null : filteredMethods[i]);
-            }
-        }
-    };
-
     // ListModel
     private class MethodListModel extends AbstractListModel {
 
@@ -119,7 +120,9 @@ public class MethodList extends JList {
             JLabel label = new JLabel(filteredMethods[index].toString());
 
             if (isSelected) {
-                label.setForeground(Color.blue);
+                label.setForeground(Color.white);
+                label.setBackground(Color.blue);
+                label.setOpaque(true);
             }
 
             return label;

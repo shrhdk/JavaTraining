@@ -4,16 +4,24 @@ import javax.swing.*;
 
 public abstract class SubFrame extends JFrame {
 
-    private final Parent listener;
+    private final DialogListener listener;
 
-    protected SubFrame(Parent listener) {
+    protected SubFrame(DialogListener listener) {
         this.listener = listener;
     }
 
     protected void return_(Object value) {
         setVisible(false);
         if (listener != null) {
-            listener.onSubFrameClose(value);
+            listener.onSubFrameReturn(value);
+        }
+        dispose();
+    }
+
+    protected void return_() {
+        setVisible(false);
+        if (listener != null) {
+            listener.onSubFrameCancel();
         }
         dispose();
     }

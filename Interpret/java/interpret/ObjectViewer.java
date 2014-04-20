@@ -10,7 +10,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Method;
 
-import static interpret.Utility.*;
+import static interpret.Utility.invoke;
+import static interpret.Utility.showMessage;
 
 public class ObjectViewer extends SubFrame {
 
@@ -20,8 +21,8 @@ public class ObjectViewer extends SubFrame {
 
     // API
 
-    public ObjectViewer(Parent parent, Object object) {
-        super(parent);
+    public ObjectViewer(Object object, DialogListener dialogListener) {
+        super(dialogListener);
         this.object = object;
         methodList.setClass(object.getClass());
         fieldsTable.setObject(object);
@@ -32,7 +33,7 @@ public class ObjectViewer extends SubFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
-                return_(null);
+                return_();
             }
         });
     }
@@ -46,18 +47,19 @@ public class ObjectViewer extends SubFrame {
     private final JTextField filterTextField = new JTextField();
     private final JSplitPane methodSplitPane = new JSplitPane();
     private final JScrollPane methodListScrollPane = new JScrollPane();
-    private final MethodList methodList = new MethodList();
+    private final JMethodList methodList = new JMethodList();
     private final JScrollPane argumentsTableScrollPane = new JScrollPane();
-    private final ArgumentsTable argumentsTable = new ArgumentsTable();
+    private final JArgumentsTable argumentsTable = new JArgumentsTable();
     private final JButton invokeButton = new JButton("Invoke Method");
 
     // Field Panel
     private final JPanel fieldsPanel = new JPanel();
     private final JScrollPane fieldsTableScrollPane = new JScrollPane();
-    private final FieldsTable fieldsTable = new FieldsTable();
+    private final JFieldsTable fieldsTable = new JFieldsTable();
 
     // Button Panel
     private final JPanel buttonPanel = new JPanel();
+    private final JButton cancelButton = new JButton("Cancel");
     private final JButton returnNullButton = new JButton("Return null");
     private final JButton returnInstanceButton = new JButton("Return instance");
 
@@ -80,7 +82,7 @@ public class ObjectViewer extends SubFrame {
         }
     };
 
-    private final MethodList.MethodChangedListener methodChangedListener = new MethodList.MethodChangedListener() {
+    private final JMethodList.MethodChangedListener methodChangedListener = new JMethodList.MethodChangedListener() {
         @Override
         public void onChange(Method method) {
             if (method == null) {
@@ -110,6 +112,13 @@ public class ObjectViewer extends SubFrame {
         }
     };
 
+    private final ActionListener cancelButtonListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            return_();
+        }
+    };
+
     private final ActionListener returnNullButtonListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
@@ -128,6 +137,7 @@ public class ObjectViewer extends SubFrame {
         filterTextField.getDocument().addDocumentListener(filterTextChangedListener);
         methodList.addMethodChangedListener(methodChangedListener);
         invokeButton.addActionListener(invokeButtonListener);
+        cancelButton.addActionListener(cancelButtonListener);
         returnNullButton.addActionListener(returnNullButtonListener);
         returnInstanceButton.addActionListener(returnInstanceButtonListener);
     }
@@ -171,6 +181,7 @@ public class ObjectViewer extends SubFrame {
 
         // Setup Button Panel
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(cancelButton);
         buttonPanel.add(returnNullButton);
         buttonPanel.add(returnInstanceButton);
 
