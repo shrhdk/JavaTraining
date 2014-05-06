@@ -16,13 +16,13 @@ public class DataHandlerTest {
 
         // Read file
         stopWatch.start();
-        lena = dataHandler.readFile(new File("lena.png"));
+        lena = dataHandler.readFile(new File("test/lena.png"));
         stopWatch.stop();
         long initial = stopWatch.getElapsedTime();
 
         // Read file with cache
         stopWatch.start();
-        lena = dataHandler.readFile(new File("lena.png"));
+        lena = dataHandler.readFile(new File("test/lena.png"));
         stopWatch.stop();
         long withCache = stopWatch.getElapsedTime();
 
@@ -32,7 +32,7 @@ public class DataHandlerTest {
 
         // Read file after clear cache.
         stopWatch.start();
-        lena = dataHandler.readFile(new File("lena.png"));
+        lena = dataHandler.readFile(new File("test/lena.png"));
         stopWatch.stop();
         long withNoCache = stopWatch.getElapsedTime();
 
