@@ -17,4 +17,9 @@ subprojects {
 	dependencies {
 		testCompile 'junit:junit:4.11'
 	}
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
