@@ -1,0 +1,12 @@
+task deployJar(type: Copy, dependsOn: jar)  {
+	from 'build/libs/2_3.jar'
+	into './'
+	rename { 'DigitalClock.jar' }
+}
+
+jar {
+	manifest {
+		attributes 'Main-Class': 'GUI2_3.DigitalClock'
+	}
+	from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+}
