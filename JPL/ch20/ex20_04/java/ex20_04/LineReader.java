@@ -1,3 +1,7 @@
+/*
+ * Copyright(C) 2014 Hideki Shiro
+ */
+
 package ex20_04;
 
 import java.io.FilterReader;
@@ -6,7 +10,7 @@ import java.io.Reader;
 
 public class LineReader extends FilterReader {
 
-    private final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private final String LINE_SEPARATOR = String.format("%n");
 
     protected LineReader(Reader reader) {
         super(reader);
@@ -16,26 +20,30 @@ public class LineReader extends FilterReader {
 
         StringBuilder sb = new StringBuilder();
 
-        for(;;) {
+        for (int cnt = 0; ; cnt++) {
             int c = super.read();
-            if(c != -1) {
+            if (c != -1) {
                 sb.append((char) c);
             } else {
-                return sb.toString();
+                if (1 <= cnt) {
+                    return sb.toString();
+                } else if (cnt == 0) {
+                    return null;
+                }
             }
 
             boolean hasLineSeparator = false;
-            if(LINE_SEPARATOR.length() <= sb.length()) {
+            if (LINE_SEPARATOR.length() <= sb.length()) {
                 hasLineSeparator = true;
-                for(int i = 1; i <= LINE_SEPARATOR.length(); i++) {
-                    if(LINE_SEPARATOR.charAt(LINE_SEPARATOR.length() - i) != sb.charAt(sb.length() - i)) {
+                for (int i = 1; i <= LINE_SEPARATOR.length(); i++) {
+                    if (LINE_SEPARATOR.charAt(LINE_SEPARATOR.length() - i) != sb.charAt(sb.length() - i)) {
                         hasLineSeparator = false;
                         break;
                     }
                 }
             }
 
-            if(hasLineSeparator) {
+            if (hasLineSeparator) {
                 return sb.toString();
             }
         }
