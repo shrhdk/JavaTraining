@@ -7,6 +7,7 @@ package ex16_09;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
 public class ClassViewer {
 
@@ -28,9 +29,13 @@ public class ClassViewer {
             str.append(" ");
         }
 
-        // Class Name
+        // Class Name and Generic Declaration
         str.append("class ");
         str.append(class_.getSimpleName());
+        final String genericDeclaration = getGenericDeclarationString(class_);
+        if (genericDeclaration != null) {
+            str.append(genericDeclaration);
+        }
         str.append(" ");
 
         // extends...
@@ -81,6 +86,26 @@ public class ClassViewer {
         }
     }
 
+    private static String getGenericDeclarationString(Class class_) {
+        final StringBuilder genericDeclaration = new StringBuilder();
+
+        final TypeVariable<Class>[] typeVars = class_.getTypeParameters();
+
+        if (typeVars.length == 0) {
+            return null;
+        } else {
+            genericDeclaration.append("<");
+            for (TypeVariable<Class> typeVar : typeVars) {
+                genericDeclaration.append(typeVar.getName());
+                genericDeclaration.append(", ");
+            }
+            genericDeclaration.delete(genericDeclaration.length() - 2, genericDeclaration.length()); // Delete last ", "
+            genericDeclaration.append(">");
+
+            return genericDeclaration.toString();
+        }
+    }
+
     private static String getSuperClassString(Class class_) {
         String extend;
         final Type super_ = class_.getGenericSuperclass();
@@ -102,7 +127,10 @@ public class ClassViewer {
         final StringBuilder implement = new StringBuilder();
 
         final Type[] interfaces = class_.getGenericInterfaces();
-        if (1 <= interfaces.length) {
+
+        if (interfaces.length == 0) {
+            return null;
+        } else {
             for (Type interface_ : interfaces) {
                 if (interface_ instanceof ParameterizedType) {
                     implement.append(getParametrizedTypeString((ParameterizedType) interface_));
@@ -113,11 +141,7 @@ public class ClassViewer {
             }
 
             implement.delete(implement.length() - 2, implement.length()); // Delete last ", "
-        }
 
-        if (implement.length() == 0) {
-            return null;
-        } else {
             return implement.toString();
         }
     }

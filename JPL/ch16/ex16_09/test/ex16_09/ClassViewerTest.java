@@ -14,7 +14,7 @@ import static org.hamcrest.core.Is.is;
 public class ClassViewerTest {
     @Test
     public void test() {
-        String expected = "private static final class Foo extends ArrayList<Integer> implements Cloneable, Comparable<Foo> {\n" +
+        String expected = "private static final class Foo<K, V> extends ArrayList<Integer> implements Cloneable, Comparable<Foo> {\n" +
                 "    class Bar {\n" +
                 "    }\n" +
                 "}\n";
@@ -24,7 +24,7 @@ public class ClassViewerTest {
         assertThat(actual, is(expected));
     }
 
-    private static final class Foo extends ArrayList<Integer> implements Cloneable, Comparable<Foo> {
+    private static final class Foo<K, V> extends ArrayList<Integer> implements Cloneable, Comparable<Foo> {
 
         class Bar {
         }
