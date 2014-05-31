@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
-puts 'hello'
+STDOUT.sync = true
+
 while str = STDIN.gets
   break if str.chomp == "exit"
   print "hello ", str
