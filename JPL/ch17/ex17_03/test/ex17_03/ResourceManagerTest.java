@@ -45,7 +45,7 @@ public class ResourceManagerTest {
     }
 
     @Test
-    public void testReaperWillWork() throws InterruptedException {
+    public void testReaperWillWork() {
         // when get resource
         final Resource res = rm.getResource(key);
 
@@ -63,7 +63,7 @@ public class ResourceManagerTest {
     }
 
     @Test
-    public void testReaperWontWork() throws InterruptedException {
+    public void testReaperWontWork() {
         // when get resource
         final Resource res = rm.getResource(key);
 

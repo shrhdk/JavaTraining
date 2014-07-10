@@ -22,7 +22,7 @@ public class ResourceManagerTest {
     // Test case
 
     @Test
-    public void testReaperWillWork() throws InterruptedException {
+    public void testReaperWillWork() {
         // when get resource and shutdown immediately
         final Resource res = rm.getResource(key);
         rm.shutdown();
@@ -41,7 +41,7 @@ public class ResourceManagerTest {
     }
 
     @Test
-    public void testReaperWontWork() throws InterruptedException {
+    public void testReaperWontWork() {
         // when get resource and shutdown immediately
         final Resource res = rm.getResource(key);
         rm.shutdown();
