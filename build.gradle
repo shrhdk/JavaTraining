@@ -1,3 +1,7 @@
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
+
 subprojects {
 	repositories {
 		mavenCentral()
@@ -9,10 +13,6 @@ subprojects {
 		main { java { srcDir 'java' } }
 		test { java { srcDir 'test' } }
 	}
-
-	def defaultEncoding = 'UTF-8'
-	tasks.withType(AbstractCompile) each { it.options.encoding = defaultEncoding }
-	tasks.withType(GroovyCompile) each { it.groovyOptions.encoding = defaultEncoding }
 
 	dependencies {
         compile 'org.apache.commons:commons-lang3:3.3.2'
